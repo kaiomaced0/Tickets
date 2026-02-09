@@ -17,8 +17,19 @@ class DashboardService
             'abertos' => (clone $baseQuery)->where('status', 'ABERTO')->count(),
             'em_andamento' => (clone $baseQuery)->where('status', 'EM_ANDAMENTO')->count(),
             'resolvidos' => (clone $baseQuery)->where('status', 'RESOLVIDO')->count(),
-            'cancelados' => (clone $baseQuery)->where('status', 'CANCELADO')->count(),
         ];
+
+        // Cancelados: admin vê todos, user vê apenas os que ele solicitou
+        $canceladosQuery = (clone $baseQuery)->where('status', 'CANCELADO');
+        if (! $user->isAdmin()) {
+            $canceladosQuery->where('solicitante_id', $user->id);
+        }
+        $canceladosCount = $canceladosQuery->count();
+
+        // Só incluir cancelados se houver pelo menos 1
+        if ($canceladosCount > 0) {
+            $counts['cancelados'] = $canceladosCount;
+        }
 
         $ultimosAbertos = Ticket::query()
             ->latest()
