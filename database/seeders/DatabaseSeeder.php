@@ -13,11 +13,30 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        User::factory()->createMany([
+            [
+                'name' => 'User One',
+                'email' => 'user1@example.com',
+                'api_token' => 'token-user-1',
+            ],
+            [
+                'name' => 'User Two',
+                'email' => 'user2@example.com',
+                'api_token' => 'token-user-2',
+            ],
+        ]);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        User::factory()->admin()->createMany([
+            [
+                'name' => 'Admin One',
+                'email' => 'admin1@example.com',
+                'api_token' => 'token-admin-1',
+            ],
+            [
+                'name' => 'Admin Two',
+                'email' => 'admin2@example.com',
+                'api_token' => 'token-admin-2',
+            ],
         ]);
     }
 }

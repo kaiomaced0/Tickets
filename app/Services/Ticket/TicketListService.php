@@ -12,12 +12,41 @@ class TicketListService
     {
     }
 
-    public function handle(?User $user = null, ?int $perPage = null): LengthAwarePaginator
+    public function handle(?User $user = null, array $filters = [], ?int $perPage = null): LengthAwarePaginator
     {
         $query = Ticket::query()->latest();
 
-        if ($user) {
-            $query->whereBelongsTo($user);
+        if ($user && empty($filters['solicitante_id'])) {
+            $query->where('solicitante_id', $user->id);
+        }
+
+        if (! empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        if (! empty($filters['prioridade'])) {
+            $query->where('prioridade', $filters['prioridade']);
+        }
+
+        if (! empty($filters['solicitante_id'])) {
+            $query->where('solicitante_id', $filters['solicitante_id']);
+        }
+
+        if (! empty($filters['responsavel_id'])) {
+            $query->where('responsavel_id', $filters['responsavel_id']);
+        }
+
+        if (array_key_exists('active', $filters)) {
+            $filters['active']
+                ? $query->withoutGlobalScope('active')->where('active', true)
+                : $query->withoutGlobalScope('active')->where('active', false);
+        }
+
+        if (! empty($filters['q'])) {
+            $query->where(function ($q) use ($filters): void {
+                $q->where('titulo', 'like', '%'.$filters['q'].'%')
+                    ->orWhere('descricao', 'like', '%'.$filters['q'].'%');
+            });
         }
 
         return $query->paginate($perPage ?? $this->defaultPerPage);

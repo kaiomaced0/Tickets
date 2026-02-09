@@ -4,12 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreTicketRequest;
 use App\Http\Requests\UpdateTicketRequest;
+use App\Http\Requests\UpdateTicketStatusRequest;
 use App\Services\Ticket\TicketCreateService;
 use App\Services\Ticket\TicketDeleteService;
 use App\Services\Ticket\TicketListService;
 use App\Services\Ticket\TicketShowService;
+use App\Services\Ticket\TicketUpdateStatusService;
 use App\Services\Ticket\TicketUpdateService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class TicketController extends Controller
@@ -20,12 +23,16 @@ class TicketController extends Controller
         private readonly TicketShowService $showService,
         private readonly TicketUpdateService $updateService,
         private readonly TicketDeleteService $deleteService,
+        private readonly TicketUpdateStatusService $statusService,
     ) {
     }
 
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $tickets = $this->listService->handle(Auth::user());
+        $filters = $request->only(['status', 'prioridade', 'solicitante_id', 'responsavel_id', 'active', 'q']);
+        $perPage = $request->integer('per_page');
+
+        $tickets = $this->listService->handle(Auth::user(), $filters, $perPage ?: null);
 
         return response()->json($tickets);
     }
@@ -39,23 +46,31 @@ class TicketController extends Controller
 
     public function show(int $ticket): JsonResponse
     {
-        $ticketModel = $this->showService->handle($ticket, Auth::user());
+        $ticketModel = $this->showService->handle($ticket);
 
         return response()->json($ticketModel);
     }
 
     public function update(UpdateTicketRequest $request, int $ticket): JsonResponse
     {
-        $ticketModel = $this->showService->handle($ticket, Auth::user());
+        $ticketModel = $this->showService->handle($ticket);
         $updated = $this->updateService->handle($ticketModel, $request->validated());
+
+        return response()->json($updated);
+    }
+
+    public function updateStatus(UpdateTicketStatusRequest $request, int $ticket): JsonResponse
+    {
+        $ticketModel = $this->showService->handle($ticket);
+        $updated = $this->statusService->handle($ticketModel, $request->validated('status'), $request->user());
 
         return response()->json($updated);
     }
 
     public function destroy(int $ticket): JsonResponse
     {
-        $ticketModel = $this->showService->handle($ticket, Auth::user());
-        $this->deleteService->handle($ticketModel);
+        $ticketModel = $this->showService->handle($ticket);
+        $this->deleteService->handle($ticketModel, Auth::user());
 
         return response()->json([], 204);
     }

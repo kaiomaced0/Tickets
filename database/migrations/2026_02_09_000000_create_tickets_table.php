@@ -10,13 +10,14 @@ return new class extends Migration
     {
         Schema::create('tickets', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->string('title');
-            $table->text('description')->nullable();
-            $table->string('status')->default('open');
-            $table->string('priority')->default('medium');
-            $table->date('due_date')->nullable();
-            $table->timestamp('closed_at')->nullable();
+            $table->foreignId('solicitante_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('responsavel_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->string('titulo', 120);
+            $table->text('descricao');
+            $table->enum('status', ['ABERTO', 'EM_ANDAMENTO', 'RESOLVIDO'])->default('ABERTO');
+            $table->enum('prioridade', ['BAIXA', 'MEDIA', 'ALTA'])->default('MEDIA');
+            $table->timestamp('resolved_at')->nullable();
+            $table->boolean('active')->default(true);
             $table->timestamps();
         });
     }

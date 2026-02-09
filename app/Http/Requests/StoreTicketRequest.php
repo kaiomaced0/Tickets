@@ -14,12 +14,12 @@ class StoreTicketRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'status' => ['nullable', 'in:open,in_progress,closed'],
-            'priority' => ['nullable', 'in:low,medium,high'],
-            'due_date' => ['nullable', 'date'],
-            'closed_at' => ['nullable', 'date'],
+            'titulo' => ['required', 'string', 'min:5', 'max:120'],
+            'descricao' => ['required', 'string', 'min:20'],
+            'status' => ['nullable', 'in:ABERTO,EM_ANDAMENTO,RESOLVIDO'],
+            'prioridade' => ['nullable', 'in:BAIXA,MEDIA,ALTA'],
+            'responsavel_id' => ['nullable', 'exists:users,id'],
+            'resolved_at' => ['nullable', 'date'],
         ];
     }
 }

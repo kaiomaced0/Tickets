@@ -14,12 +14,11 @@ class UpdateTicketRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => ['sometimes', 'required', 'string', 'max:255'],
-            'description' => ['sometimes', 'nullable', 'string'],
-            'status' => ['sometimes', 'nullable', 'in:open,in_progress,closed'],
-            'priority' => ['sometimes', 'nullable', 'in:low,medium,high'],
-            'due_date' => ['sometimes', 'nullable', 'date'],
-            'closed_at' => ['sometimes', 'nullable', 'date'],
+            'titulo' => ['sometimes', 'required', 'string', 'min:5', 'max:120'],
+            'descricao' => ['sometimes', 'required', 'string', 'min:20'],
+            'prioridade' => ['sometimes', 'nullable', 'in:BAIXA,MEDIA,ALTA'],
+            'responsavel_id' => ['sometimes', 'nullable', 'exists:users,id'],
+            'resolved_at' => ['sometimes', 'nullable', 'date'],
         ];
     }
 }

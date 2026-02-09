@@ -3,14 +3,17 @@
 namespace App\Services\Ticket;
 
 use App\Models\Ticket;
-use App\Models\User;
 
 class TicketShowService
 {
-    public function handle(int $ticketId, User $user): Ticket
+    public function handle(int $ticketId, bool $withInactive = false): Ticket
     {
-        return Ticket::query()
-            ->whereBelongsTo($user)
-            ->findOrFail($ticketId);
+        $query = Ticket::query();
+
+        if ($withInactive) {
+            $query->withInactive();
+        }
+
+        return $query->findOrFail($ticketId);
     }
 }

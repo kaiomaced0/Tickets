@@ -9,14 +9,21 @@ class TicketCreateService
 {
     public function handle(array $data, User $user): Ticket
     {
+        $status = $data['status'] ?? 'ABERTO';
+        $resolvedAt = $data['resolved_at'] ?? null;
+
+        if ($status === 'RESOLVIDO' && ! $resolvedAt) {
+            $resolvedAt = now();
+        }
+
         return Ticket::create([
-            'user_id' => $user->id,
-            'title' => $data['title'],
-            'description' => $data['description'] ?? null,
-            'status' => $data['status'] ?? 'open',
-            'priority' => $data['priority'] ?? 'medium',
-            'due_date' => $data['due_date'] ?? null,
-            'closed_at' => $data['closed_at'] ?? null,
+            'solicitante_id' => $user->id,
+            'responsavel_id' => $data['responsavel_id'] ?? null,
+            'titulo' => $data['titulo'],
+            'descricao' => $data['descricao'],
+            'status' => $status,
+            'prioridade' => $data['prioridade'] ?? 'MEDIA',
+            'resolved_at' => $resolvedAt,
         ]);
     }
 }

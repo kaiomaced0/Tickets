@@ -2,31 +2,67 @@
 
 namespace App\Models;
 
+use App\Models\TicketStatusLog;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Ticket extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
-        'title',
-        'description',
+        'solicitante_id',
+        'responsavel_id',
+        'titulo',
+        'descricao',
         'status',
-        'priority',
-        'due_date',
-        'closed_at',
+        'prioridade',
+        'resolved_at',
+        'active',
     ];
 
     protected $casts = [
-        'due_date' => 'date',
-        'closed_at' => 'datetime',
+        'resolved_at' => 'datetime',
+        'active' => 'boolean',
     ];
 
-    public function user(): BelongsTo
+    protected static function booted(): void
     {
-        return $this->belongsTo(User::class);
+        // Default all queries to active tickets
+        static::addGlobalScope('active', fn (Builder $query) => $query->where('active', true));
+    }
+
+    public function solicitante(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'solicitante_id');
+    }
+
+    public function responsavel(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'responsavel_id');
+    }
+
+    public function statusLogs(): HasMany
+    {
+        return $this->hasMany(TicketStatusLog::class);
+    }
+
+    public function scopeWithInactive(Builder $query): Builder
+    {
+        return $query->withoutGlobalScope('active');
+    }
+
+    public function delete(): bool
+    {
+        if (! $this->exists) {
+            return false;
+        }
+
+        $this->active = false;
+
+        return $this->saveQuietly();
     }
 }
