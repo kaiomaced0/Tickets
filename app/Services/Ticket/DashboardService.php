@@ -17,6 +17,7 @@ class DashboardService
             'abertos' => (clone $baseQuery)->where('status', 'ABERTO')->count(),
             'em_andamento' => (clone $baseQuery)->where('status', 'EM_ANDAMENTO')->count(),
             'resolvidos' => (clone $baseQuery)->where('status', 'RESOLVIDO')->count(),
+            'cancelados' => (clone $baseQuery)->where('status', 'CANCELADO')->count(),
         ];
 
         $ultimosAbertos = Ticket::query()

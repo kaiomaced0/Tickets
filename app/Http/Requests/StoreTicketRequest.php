@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\Prioridade;
+use App\Enums\TicketStatus;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreTicketRequest extends FormRequest
 {
@@ -11,13 +14,21 @@ class StoreTicketRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'status' => TicketStatus::tryFromMixed($this->input('status'))?->value,
+            'prioridade' => Prioridade::tryFromMixed($this->input('prioridade'))?->value,
+        ]);
+    }
+
     public function rules(): array
     {
         return [
             'titulo' => ['required', 'string', 'min:5', 'max:120'],
             'descricao' => ['required', 'string', 'min:20'],
-            'status' => ['nullable', 'in:ABERTO,EM_ANDAMENTO,RESOLVIDO'],
-            'prioridade' => ['nullable', 'in:BAIXA,MEDIA,ALTA'],
+            'status' => ['nullable', Rule::in(TicketStatus::values())],
+            'prioridade' => ['nullable', Rule::in(Prioridade::values())],
             'responsavel_id' => ['nullable', 'exists:users,id'],
             'resolved_at' => ['nullable', 'date'],
         ];

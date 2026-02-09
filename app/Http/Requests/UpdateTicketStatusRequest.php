@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\TicketStatus;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateTicketStatusRequest extends FormRequest
 {
@@ -11,10 +13,17 @@ class UpdateTicketStatusRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'status' => TicketStatus::tryFromMixed($this->input('status'))?->value,
+        ]);
+    }
+
     public function rules(): array
     {
         return [
-            'status' => ['required', 'in:ABERTO,EM_ANDAMENTO,RESOLVIDO'],
+            'status' => ['required', Rule::in(TicketStatus::values())],
         ];
     }
 }

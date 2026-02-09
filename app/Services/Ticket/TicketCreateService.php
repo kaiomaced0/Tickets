@@ -2,6 +2,8 @@
 
 namespace App\Services\Ticket;
 
+use App\Enums\Prioridade;
+use App\Enums\TicketStatus;
 use App\Models\Ticket;
 use App\Models\User;
 
@@ -9,10 +11,10 @@ class TicketCreateService
 {
     public function handle(array $data, User $user): Ticket
     {
-        $status = $data['status'] ?? 'ABERTO';
+        $status = TicketStatus::tryFromMixed($data['status'] ?? null)?->value ?? TicketStatus::ABERTO->value;
         $resolvedAt = $data['resolved_at'] ?? null;
 
-        if ($status === 'RESOLVIDO' && ! $resolvedAt) {
+        if ($status === TicketStatus::RESOLVIDO->value && ! $resolvedAt) {
             $resolvedAt = now();
         }
 
@@ -22,7 +24,7 @@ class TicketCreateService
             'titulo' => $data['titulo'],
             'descricao' => $data['descricao'],
             'status' => $status,
-            'prioridade' => $data['prioridade'] ?? 'MEDIA',
+            'prioridade' => Prioridade::tryFromMixed($data['prioridade'] ?? null)?->value ?? Prioridade::MEDIA->value,
             'resolved_at' => $resolvedAt,
         ]);
     }

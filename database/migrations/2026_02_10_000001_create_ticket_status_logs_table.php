@@ -12,8 +12,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('ticket_id')->constrained('tickets')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->enum('from_status', ['ABERTO', 'EM_ANDAMENTO', 'RESOLVIDO'])->nullable();
-            $table->enum('to_status', ['ABERTO', 'EM_ANDAMENTO', 'RESOLVIDO']);
+            $table->enum('from_status', ['ABERTO', 'EM_ANDAMENTO', 'RESOLVIDO', 'CANCELADO'])->nullable();
+            $table->enum('to_status', ['ABERTO', 'EM_ANDAMENTO', 'RESOLVIDO', 'CANCELADO']);
             $table->timestamps();
         });
     }

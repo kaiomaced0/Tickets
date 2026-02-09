@@ -14,7 +14,7 @@ return new class extends Migration
             $table->foreignId('responsavel_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('titulo', 120);
             $table->text('descricao');
-            $table->enum('status', ['ABERTO', 'EM_ANDAMENTO', 'RESOLVIDO'])->default('ABERTO');
+            $table->enum('status', ['ABERTO', 'EM_ANDAMENTO', 'RESOLVIDO', 'CANCELADO'])->default('ABERTO');
             $table->enum('prioridade', ['BAIXA', 'MEDIA', 'ALTA'])->default('MEDIA');
             $table->timestamp('resolved_at')->nullable();
             $table->boolean('active')->default(true);

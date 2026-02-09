@@ -2,6 +2,7 @@
 
 namespace App\Services\Ticket;
 
+use App\Enums\Prioridade;
 use App\Models\Ticket;
 
 class TicketUpdateService
