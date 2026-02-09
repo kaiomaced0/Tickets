@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ListTicketsRequest;
 use App\Http\Requests\StoreTicketRequest;
 use App\Http\Requests\UpdateTicketRequest;
 use App\Http\Requests\UpdateTicketStatusRequest;
@@ -12,7 +13,6 @@ use App\Services\Ticket\TicketShowService;
 use App\Services\Ticket\TicketUpdateStatusService;
 use App\Services\Ticket\TicketUpdateService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class TicketController extends Controller
@@ -27,14 +27,23 @@ class TicketController extends Controller
     ) {
     }
 
-    public function index(Request $request): JsonResponse
+    public function index(ListTicketsRequest $request): JsonResponse
     {
-        $filters = $request->only(['status', 'prioridade', 'solicitante_id', 'responsavel_id', 'active', 'q']);
-        $perPage = $request->integer('per_page');
+        $filters = $request->safe()->only(['status', 'prioridade', 'solicitante_id', 'responsavel_id', 'active', 'q']);
+        $perPage = $request->validated('per_page');
 
-        $tickets = $this->listService->handle(Auth::user(), $filters, $perPage ?: null);
+        $tickets = $this->listService->handle(Auth::user(), $filters, $perPage);
 
-        return response()->json($tickets);
+        return response()->json([
+            'data' => $tickets->items(),
+            'meta' => [
+                'total' => $tickets->total(),
+                'per_page' => $tickets->perPage(),
+                'current_page' => $tickets->currentPage(),
+                'last_page' => $tickets->lastPage(),
+                'filters' => $filters,
+            ],
+        ]);
     }
 
     public function store(StoreTicketRequest $request): JsonResponse
