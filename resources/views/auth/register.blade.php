@@ -1,5 +1,5 @@
 <x-guest-layout>
-    <form method="POST" action="{{ route('register') }}">
+    <div method="POST" action="{{ route('register') }}">
         @csrf
 
         <!-- Name -->
@@ -21,9 +21,9 @@
             <x-input-label for="password" :value="__('Password')" />
 
             <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="new-password" />
+                type="password"
+                name="password"
+                required autocomplete="new-password" />
 
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
@@ -33,20 +33,30 @@
             <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
 
             <x-text-input id="password_confirmation" class="block mt-1 w-full"
-                            type="password"
-                            name="password_confirmation" required autocomplete="new-password" />
+                type="password"
+                name="password_confirmation" required autocomplete="new-password" />
 
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
 
-        <div class="flex items-center justify-end mt-4">
-            <a class="underline text-sm text-muted-foreground hover:text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary" href="{{ route('login') }}">
-                {{ __('Already registered?') }}
+        <div class="mt-6 p-4 rounded-lg bg-muted/50 border border-border">
+            <div class="flex-1">
+                <p class="text-sm text-muted-foreground">
+                   Ao Registrar-se, sua conta entrará em um processo de aprovação, onde um administrador irá revisar e aprovar seu acesso. Você receberá uma notificação por e-mail assim que sua conta for aprovada. Obrigado pela compreensão!
+                </p>
+            </div>
+        </div>
+        <div class="flex items-center justify-between mt-4">
+            <a href="{{ route('login') }}" class="inline-flex items-center px-4 py-2 bg-secondary border border-border rounded-md font-semibold text-xs text-foreground uppercase tracking-widest hover:bg-secondary/80 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition ease-in-out duration-150">
+                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+                Voltar para Login
             </a>
 
             <x-primary-button class="ms-4">
                 {{ __('Register') }}
             </x-primary-button>
         </div>
-    </form>
+        </form>
 </x-guest-layout>

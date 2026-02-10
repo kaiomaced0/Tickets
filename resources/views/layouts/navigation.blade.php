@@ -20,6 +20,7 @@
 
                 <div class="hidden md:flex items-center gap-2 text-sm ms-4">
                     <a href="{{ route('dashboard') }}" class="px-3 py-2 rounded-lg transition {{ request()->routeIs('dashboard') ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/40' }}">Dashboard</a>
+                    <a href="{{ route('tickets.list') }}" class="px-3 py-2 rounded-lg transition {{ request()->routeIs('tickets.*') ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/40' }}">Tickets</a>
                 </div>
             </div>
 
@@ -91,6 +92,9 @@
         <div class="pt-3 pb-2 space-y-1 px-4">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('tickets.list')" :active="request()->routeIs('tickets.*')">
+                Tickets
             </x-responsive-nav-link>
         </div>
 

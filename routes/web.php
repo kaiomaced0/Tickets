@@ -22,7 +22,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
     Route::patch('/settings/theme', [SettingsController::class, 'updateTheme'])->name('settings.theme');
 
-    Route::resource('tickets', TicketController::class)->except(['create', 'edit']);
+    Route::get('/tickets', [TicketController::class, 'webIndex'])->name('tickets.list');
+    Route::patch('/tickets/{ticket}/status', [TicketController::class, 'updateStatus'])->name('tickets.update-status');
+    Route::resource('tickets', TicketController::class)->except(['index', 'create', 'edit']);
 });
 
 require __DIR__.'/auth.php';

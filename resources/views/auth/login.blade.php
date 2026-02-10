@@ -55,9 +55,8 @@
             <div class="flex-1">
                 <p class="text-sm text-muted-foreground">
                     <strong class="text-foreground">Novo no sistema?</strong><br>
-                    Para criar uma nova conta, você pode se <a href="{{ route('register') }}" class="text-primary hover:underline font-medium">cadastrar aqui</a>. 
-                    Sua conta será ativada por um administrador antes que você possa fazer login.
-                </p>
+                    Você pode se <a href="{{ route('register') }}" class="text-primary hover:underline font-medium">cadastrar aqui</a>.
+                    </p>
             </div>
         </div>
     </div>

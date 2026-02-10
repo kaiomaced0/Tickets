@@ -52,7 +52,7 @@ class LoginRequest extends FormRequest
         // Verificar se o usuário está ativo
         if (Auth::user() && !Auth::user()->active) {
             Auth::logout();
-            
+
             throw ValidationException::withMessages([
                 'email' => 'Usuário inativo, entre em contato com um admin!',
             ]);
