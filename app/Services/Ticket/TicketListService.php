@@ -45,10 +45,16 @@ class TicketListService
         if (! empty($filters['q'])) {
             $query->where(function ($q) use ($filters): void {
                 $q->where('titulo', 'like', '%'.$filters['q'].'%')
-                    ->orWhere('descricao', 'like', '%'.$filters['q'].'%');
+                    ->orWhere('descricao', 'like', '%'.$filters['q'].'%')
+                    ->orWhereHas('solicitante', function ($userQuery) use ($filters): void {
+                        $userQuery->where('name', 'like', '%'.$filters['q'].'%');
+                    })
+                    ->orWhereHas('responsavel', function ($userQuery) use ($filters): void {
+                        $userQuery->where('name', 'like', '%'.$filters['q'].'%');
+                    });
             });
         }
 
-        return $query->paginate($perPage ?? $this->defaultPerPage);
+        return $query->with(['solicitante', 'responsavel'])->paginate($perPage ?? $this->defaultPerPage);
     }
 }
