@@ -18,8 +18,12 @@ class TicketCreateService
             $resolvedAt = now();
         }
 
+        // Se solicitante_id não foi informado, usa o usuário logado
+        // Isso permite que admins atribuam tickets para outros usuários
+        $solicitanteId = $data['solicitante_id'] ?? $user->id;
+
         return Ticket::create([
-            'solicitante_id' => $user->id,
+            'solicitante_id' => $solicitanteId,
             'responsavel_id' => $data['responsavel_id'] ?? null,
             'titulo' => $data['titulo'],
             'descricao' => $data['descricao'],

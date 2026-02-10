@@ -29,6 +29,7 @@ class StoreTicketRequest extends FormRequest
             'descricao' => ['required', 'string', 'min:20'],
             'status' => ['nullable', Rule::in(TicketStatus::values())],
             'prioridade' => ['nullable', Rule::in(Prioridade::values())],
+            'solicitante_id' => ['nullable', 'exists:users,id'],
             'responsavel_id' => ['nullable', 'exists:users,id'],
             'resolved_at' => ['nullable', 'date'],
         ];

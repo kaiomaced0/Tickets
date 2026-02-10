@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateTicketRequest;
 use App\Http\Requests\UpdateTicketStatusRequest;
 use App\Services\Ticket\TicketCreateService;
 use App\Services\Ticket\TicketDeleteService;
+use App\Services\Ticket\TicketFilterService;
 use App\Services\Ticket\TicketListService;
 use App\Services\Ticket\TicketShowService;
 use App\Services\Ticket\TicketUpdateStatusService;
@@ -27,6 +28,7 @@ class TicketController extends Controller
         private readonly TicketUpdateService $updateService,
         private readonly TicketDeleteService $deleteService,
         private readonly TicketUpdateStatusService $statusService,
+        private readonly TicketFilterService $filterService,
     ) {
     }
 
@@ -51,34 +53,22 @@ class TicketController extends Controller
 
     public function webIndex(Request $request): View
     {
-        $filters = [
+        $rawFilters = [
             'status' => $request->query('status'),
             'prioridade' => $request->query('prioridade'),
             'q' => $request->query('q'),
-            'user_type' => $request->query('user_type'), // 'solicitante' ou 'responsavel'
-            'user_filter' => $request->query('user_filter'), // 'me' ou nome
+            'user_type' => $request->query('user_type'),
+            'user_filter' => $request->query('user_filter'),
         ];
 
-        // Ajustar filtros baseado no tipo de usuário
-        if (!empty($filters['user_type']) && !empty($filters['user_filter'])) {
-            if ($filters['user_filter'] === 'me') {
-                $filters[$filters['user_type'] . '_id'] = Auth::id();
-            } else {
-                // Buscar usuário por nome
-                $user = User::where('name', 'like', '%' . $filters['user_filter'] . '%')->first();
-                if ($user) {
-                    $filters[$filters['user_type'] . '_id'] = $user->id;
-                }
-            }
-        }
-
-        $tickets = $this->listService->handle(Auth::user(), array_filter($filters), 15);
+        $filters = $this->filterService->processWebFilters($rawFilters);
+        $tickets = $this->listService->handle(Auth::user(), $filters, 15);
         $users = User::where('active', true)->orderBy('name')->get();
 
         return view('tickets', [
             'tickets' => $tickets,
             'users' => $users,
-            'filters' => $filters,
+            'filters' => $rawFilters,
             'statuses' => ['ABERTO', 'EM_ANDAMENTO', 'RESOLVIDO', 'CANCELADO'],
             'prioridades' => ['BAIXA', 'MEDIA', 'ALTA'],
         ]);
