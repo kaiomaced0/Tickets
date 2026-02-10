@@ -12,32 +12,38 @@
         'ALTA' => ['label' => 'Alta', 'color' => 'text-rose-700 bg-rose-50 dark:text-rose-400 dark:bg-rose-950'],
     ];
 
-    $canEdit = Auth::user()->role === 'ADMIN' ||
-               Auth::user()->id === $ticket->solicitante_id ||
-               Auth::user()->id === $ticket->responsavel_id;
+    $isAdmin = Auth::user()->role === 'ADMIN';
+    $isSolicitante = Auth::user()->id === $ticket->solicitante_id;
+    $isResponsavel = Auth::user()->id === $ticket->responsavel_id;
+
+    // Permissões granulares
+    $canEditBasic = $isAdmin || $isSolicitante; // Título e descrição
+    $canEditClassification = $isAdmin || $isSolicitante || $isResponsavel; // Prioridade e status
+    $canEditUsers = $isAdmin; // Solicitante e responsável
+    $canSelfAssign = Auth::user()->role === 'USER' && !$isResponsavel; // USER pode se auto-atribuir
 @endphp
 
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
-            <div>
-                <h2 class="font-semibold text-base text-foreground leading-tight">Ticket #{{ $ticket->id }}</h2>
-                <p class="text-xs text-muted-foreground">Detalhes e edição do ticket</p>
-            </div>
-            <div class="flex items-center gap-2">
-                <a href="{{ route('tickets.list') }}" class="inline-flex items-center px-4 py-2 rounded-lg border border-border bg-secondary text-foreground text-sm font-medium hover:bg-secondary/80 transition-colors">
-                    <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-                        <path d="M19 12H5M12 19l-7-7 7-7"/>
-                    </svg>
-                    Voltar
-                </a>
-            </div>
+        <div>
+            <h2 class="font-semibold text-base text-foreground leading-tight">Ticket #{{ $ticket->id }}</h2>
+            <p class="text-xs text-muted-foreground">Detalhes e edição do ticket</p>
         </div>
     </x-slot>
 
     <div class="py-6">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="max-w-4xl mx-auto space-y-6">
+            <div class="max-w-5xl mx-auto space-y-4">
+                <!-- Botão Voltar -->
+                <div>
+                    <a href="{{ route('tickets.list') }}" class="inline-flex items-center px-4 py-2 rounded-lg border border-border bg-secondary text-foreground text-sm font-medium hover:bg-secondary/80 transition-colors">
+                        <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                            <path d="M19 12H5M12 19l-7-7 7-7"/>
+                        </svg>
+                        Voltar
+                    </a>
+                </div>
+
                 @if(session('success'))
                     <div class="rounded-lg border border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950/20 p-4">
                         <div class="flex items-center gap-3">
@@ -52,65 +58,156 @@
                     </div>
                 @endif
 
-                <!-- Informações do Ticket -->
-                <div class="rounded-xl border border-border/50 bg-card/60 shadow-sm">
-                    <div class="p-6 border-b border-border/50 flex items-center justify-between">
-                        <div>
-                            <h3 class="text-lg font-semibold text-foreground">Informações do Ticket</h3>
-                            <div class="flex items-center gap-2 mt-2">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusLabels[$ticket->status]['color'] }}">
-                                    {{ $statusLabels[$ticket->status]['label'] }}
-                                </span>
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $prioridadeLabels[$ticket->prioridade]['color'] }}">
-                                    {{ $prioridadeLabels[$ticket->prioridade]['label'] }}
-                                </span>
-                            </div>
-                        </div>
-                        <div class="text-right text-sm text-muted-foreground">
-                            <p>Criado em {{ $ticket->created_at->format('d/m/Y H:i') }}</p>
-                            @if($ticket->updated_at != $ticket->created_at)
-                                <p>Atualizado em {{ $ticket->updated_at->format('d/m/Y H:i') }}</p>
-                            @endif
-                        </div>
-                    </div>
+                <form method="POST" action="{{ route('tickets.update-web', $ticket->id) }}" class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    @csrf
+                    @method('PATCH')
 
-                    @if($canEdit)
-                        <form method="POST" action="{{ route('tickets.update-web', $ticket->id) }}" class="p-6 space-y-6">
-                            @csrf
-                            @method('PATCH')
+                    <!-- Coluna Principal - Informações do Ticket -->
+                    <div class="lg:col-span-2 space-y-4">
+                        <!-- Card de Título e Descrição -->
+                        <div class="rounded-xl border border-border/50 bg-card/60 shadow-sm p-6 space-y-6">
+                            <!-- Cabeçalho com Status e Prioridade -->
+                            <div class="flex items-center justify-between border-b border-border/50 pb-4">
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusLabels[$ticket->status]['color'] }}">
+                                        {{ $statusLabels[$ticket->status]['label'] }}
+                                    </span>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $prioridadeLabels[$ticket->prioridade]['color'] }}">
+                                        {{ $prioridadeLabels[$ticket->prioridade]['label'] }}
+                                    </span>
+                                </div>
+                                <div class="text-right text-xs text-muted-foreground">
+                                    <p>Criado em {{ $ticket->created_at->format('d/m/Y H:i') }}</p>
+                                    @if($ticket->updated_at != $ticket->created_at)
+                                        <p>Atualizado em {{ $ticket->updated_at->format('d/m/Y H:i') }}</p>
+                                    @endif
+                                </div>
+                            </div>
 
                             <!-- Título -->
                             <div>
                                 <x-input-label for="titulo" value="Título *" />
-                                <x-text-input
-                                    id="titulo"
-                                    name="titulo"
-                                    type="text"
-                                    class="mt-1 block w-full"
-                                    :value="old('titulo', $ticket->titulo)"
-                                    required
-                                />
-                                <x-input-error class="mt-2" :messages="$errors->get('titulo')" />
+                                @if($canEditBasic)
+                                    <x-text-input
+                                        id="titulo"
+                                        name="titulo"
+                                        type="text"
+                                        class="mt-1 block w-full"
+                                        :value="old('titulo', $ticket->titulo)"
+                                        required
+                                    />
+                                    <x-input-error class="mt-2" :messages="$errors->get('titulo')" />
+                                @else
+                                    <p class="mt-1 text-foreground">{{ $ticket->titulo }}</p>
+                                @endif
                             </div>
 
                             <!-- Descrição -->
                             <div>
                                 <x-input-label for="descricao" value="Descrição *" />
-                                <textarea
-                                    id="descricao"
-                                    name="descricao"
-                                    rows="6"
-                                    class="mt-1 block w-full rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary"
-                                    required
-                                >{{ old('descricao', $ticket->descricao) }}</textarea>
-                                <x-input-error class="mt-2" :messages="$errors->get('descricao')" />
+                                @if($canEditBasic)
+                                    <textarea
+                                        id="descricao"
+                                        name="descricao"
+                                        rows="12"
+                                        class="mt-1 block w-full rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary"
+                                        required
+                                    >{{ old('descricao', $ticket->descricao) }}</textarea>
+                                    <x-input-error class="mt-2" :messages="$errors->get('descricao')" />
+                                @else
+                                    <p class="mt-1 text-foreground whitespace-pre-line">{{ $ticket->descricao }}</p>
+                                @endif
                             </div>
+                        </div>
 
-                            <!-- Prioridade e Status -->
+                        <!-- Card de Pessoas Envolvidas -->
+                        <div class="rounded-xl border border-border/50 bg-card/60 shadow-sm p-6 space-y-6">
+                            <h3 class="text-lg font-semibold text-foreground border-b border-border/50 pb-3">Pessoas Envolvidas</h3>
+
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <!-- Prioridade -->
+                                <!-- Solicitante -->
                                 <div>
-                                    <x-input-label for="prioridade" value="Prioridade *" />
+                                    <x-input-label for="solicitante_id" value="Solicitante" />
+                                    @if($canEditUsers)
+                                        <select
+                                            id="solicitante_id"
+                                            name="solicitante_id"
+                                            class="mt-1 block w-full rounded-lg border border-border bg-background text-foreground focus:border-primary focus:ring-primary"
+                                        >
+                                            <option value="">Selecione o solicitante</option>
+                                            @foreach($users as $user)
+                                                <option value="{{ $user->id }}" {{ old('solicitante_id', $ticket->solicitante_id) == $user->id ? 'selected' : '' }}>
+                                                    {{ $user->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <x-input-error class="mt-2" :messages="$errors->get('solicitante_id')" />
+                                    @else
+                                        <div class="mt-2 flex items-center gap-3">
+                                            <div class="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-medium">
+                                                {{ strtoupper(substr($ticket->solicitante->name, 0, 2)) }}
+                                            </div>
+                                            <div>
+                                                <p class="text-sm font-medium text-foreground">{{ $ticket->solicitante->name }}</p>
+                                                <p class="text-xs text-muted-foreground">{{ $ticket->solicitante->email }}</p>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
+
+                                <!-- Responsável -->
+                                <div>
+                                    <x-input-label for="responsavel_id" value="Responsável" />
+                                    @if($canEditUsers || $canSelfAssign)
+                                        <select
+                                            id="responsavel_id"
+                                            name="responsavel_id"
+                                            class="mt-1 block w-full rounded-lg border border-border bg-background text-foreground focus:border-primary focus:ring-primary"
+                                        >
+                                            <option value="">Nenhum responsável</option>
+                                            @if($canEditUsers)
+                                                @foreach($users as $user)
+                                                    <option value="{{ $user->id }}" {{ old('responsavel_id', $ticket->responsavel_id) == $user->id ? 'selected' : '' }}>
+                                                        {{ $user->name }}
+                                                    </option>
+                                                @endforeach
+                                            @elseif($canSelfAssign)
+                                                <option value="{{ Auth::id() }}" {{ old('responsavel_id', $ticket->responsavel_id) == Auth::id() ? 'selected' : '' }}>
+                                                    {{ Auth::user()->name }} (Eu)
+                                                </option>
+                                            @endif
+                                        </select>
+                                        <x-input-error class="mt-2" :messages="$errors->get('responsavel_id')" />
+                                    @else
+                                        @if($ticket->responsavel)
+                                            <div class="mt-2 flex items-center gap-3">
+                                                <div class="h-10 w-10 rounded-full bg-secondary/50 text-foreground flex items-center justify-center text-sm font-medium">
+                                                    {{ strtoupper(substr($ticket->responsavel->name, 0, 2)) }}
+                                                </div>
+                                                <div>
+                                                    <p class="text-sm font-medium text-foreground">{{ $ticket->responsavel->name }}</p>
+                                                    <p class="text-xs text-muted-foreground">{{ $ticket->responsavel->email }}</p>
+                                                </div>
+                                            </div>
+                                        @else
+                                            <p class="mt-2 text-sm text-muted-foreground italic">Nenhum responsável atribuído</p>
+                                        @endif
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Coluna Lateral - Classificação -->
+                    <div class="space-y-4">
+                        <!-- Card de Classificação -->
+                        <div class="rounded-xl border border-border/50 bg-card/60 shadow-sm p-6 space-y-6">
+                            <h3 class="text-lg font-semibold text-foreground border-b border-border/50 pb-3">Classificação</h3>
+
+                            <!-- Prioridade -->
+                            <div>
+                                <x-input-label for="prioridade" value="Prioridade *" />
+                                @if($canEditClassification)
                                     <select
                                         id="prioridade"
                                         name="prioridade"
@@ -124,11 +221,17 @@
                                         @endforeach
                                     </select>
                                     <x-input-error class="mt-2" :messages="$errors->get('prioridade')" />
-                                </div>
+                                @else
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $prioridadeLabels[$ticket->prioridade]['color'] }} mt-2">
+                                        {{ $prioridadeLabels[$ticket->prioridade]['label'] }}
+                                    </span>
+                                @endif
+                            </div>
 
-                                <!-- Status -->
-                                <div>
-                                    <x-input-label for="status" value="Status *" />
+                            <!-- Status -->
+                            <div>
+                                <x-input-label for="status" value="Status *" />
+                                @if($canEditClassification)
                                     <select
                                         id="status"
                                         name="status"
@@ -142,39 +245,20 @@
                                         @endforeach
                                     </select>
                                     <x-input-error class="mt-2" :messages="$errors->get('status')" />
-                                </div>
+                                @else
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusLabels[$ticket->status]['color'] }} mt-2">
+                                        {{ $statusLabels[$ticket->status]['label'] }}
+                                    </span>
+                                @endif
                             </div>
+                        </div>
 
-                            <!-- Responsável -->
-                            @if(Auth::user()->role === 'ADMIN')
-                                <div>
-                                    <x-input-label for="responsavel_id" value="Responsável" />
-                                    <select
-                                        id="responsavel_id"
-                                        name="responsavel_id"
-                                        class="mt-1 block w-full rounded-lg border border-border bg-background text-foreground focus:border-primary focus:ring-primary"
-                                    >
-                                        <option value="">Nenhum responsável</option>
-                                        @foreach($users as $user)
-                                            <option value="{{ $user->id }}" {{ old('responsavel_id', $ticket->responsavel_id) == $user->id ? 'selected' : '' }}>
-                                                {{ $user->name }} ({{ $user->email }})
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    <x-input-error class="mt-2" :messages="$errors->get('responsavel_id')" />
-                                </div>
-                            @endif
-
-                            <div class="pt-4 border-t border-border/50 flex items-center justify-end gap-3">
-                                <a
-                                    href="{{ route('tickets.list') }}"
-                                    class="inline-flex items-center px-4 py-2 rounded-lg border border-border bg-secondary text-foreground text-sm font-medium hover:bg-secondary/80 transition-colors"
-                                >
-                                    Cancelar
-                                </a>
+                        <!-- Botões de Ação -->
+                        @if($canEditBasic || $canEditClassification || $canEditUsers || $canSelfAssign)
+                            <div class="rounded-xl border border-border/50 bg-card/60 shadow-sm p-6">
                                 <button
                                     type="submit"
-                                    class="inline-flex items-center px-5 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+                                    class="w-full inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
                                 >
                                     <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                                         <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
@@ -183,80 +267,9 @@
                                     Salvar Alterações
                                 </button>
                             </div>
-                        </form>
-                    @else
-                        <div class="p-6 space-y-6">
-                            <!-- Título -->
-                            <div>
-                                <x-input-label value="Título" />
-                                <p class="mt-1 text-foreground">{{ $ticket->titulo }}</p>
-                            </div>
-
-                            <!-- Descrição -->
-                            <div>
-                                <x-input-label value="Descrição" />
-                                <p class="mt-1 text-foreground whitespace-pre-line">{{ $ticket->descricao }}</p>
-                            </div>
-
-                            <!-- Prioridade e Status -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <x-input-label value="Prioridade" />
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $prioridadeLabels[$ticket->prioridade]['color'] }} mt-2">
-                                        {{ $prioridadeLabels[$ticket->prioridade]['label'] }}
-                                    </span>
-                                </div>
-
-                                <div>
-                                    <x-input-label value="Status" />
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusLabels[$ticket->status]['color'] }} mt-2">
-                                        {{ $statusLabels[$ticket->status]['label'] }}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    @endif
-                </div>
-
-                <!-- Informações de Usuários -->
-                <div class="rounded-xl border border-border/50 bg-card/60 shadow-sm">
-                    <div class="p-6 border-b border-border/50">
-                        <h3 class="text-lg font-semibold text-foreground">Pessoas Envolvidas</h3>
+                        @endif
                     </div>
-                    <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Solicitante -->
-                        <div>
-                            <x-input-label value="Solicitante" />
-                            <div class="mt-2 flex items-center gap-3">
-                                <div class="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-medium">
-                                    {{ strtoupper(substr($ticket->solicitante->name, 0, 2)) }}
-                                </div>
-                                <div>
-                                    <p class="text-sm font-medium text-foreground">{{ $ticket->solicitante->name }}</p>
-                                    <p class="text-xs text-muted-foreground">{{ $ticket->solicitante->email }}</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Responsável -->
-                        <div>
-                            <x-input-label value="Responsável" />
-                            @if($ticket->responsavel)
-                                <div class="mt-2 flex items-center gap-3">
-                                    <div class="h-10 w-10 rounded-full bg-secondary/50 text-foreground flex items-center justify-center text-sm font-medium">
-                                        {{ strtoupper(substr($ticket->responsavel->name, 0, 2)) }}
-                                    </div>
-                                    <div>
-                                        <p class="text-sm font-medium text-foreground">{{ $ticket->responsavel->name }}</p>
-                                        <p class="text-xs text-muted-foreground">{{ $ticket->responsavel->email }}</p>
-                                    </div>
-                                </div>
-                            @else
-                                <p class="mt-2 text-sm text-muted-foreground italic">Nenhum responsável atribuído</p>
-                            @endif
-                        </div>
-                    </div>
-                </div>
+                </form>
             </div>
         </div>
     </div>
