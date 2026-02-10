@@ -5,11 +5,14 @@ use App\Http\Controllers\TicketController;
 use App\Http\Controllers\SettingsController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/', function () {
-        return view('welcome');
-    });
+Route::get('/', function () {
+    if (auth()->check()) {
+        return redirect()->route('dashboard');
+    }
+    return view('welcome');
+});
 
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', \App\Http\Controllers\DashboardController::class)->name('dashboard');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -44,4 +44,21 @@
             </x-primary-button>
         </div>
     </form>
+
+    <!-- Nota sobre cadastro -->
+    <div class="mt-6 p-4 rounded-lg bg-muted/50 border border-border">
+        <div class="flex items-start gap-3">
+            <svg class="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 16v-4M12 8h.01"/>
+            </svg>
+            <div class="flex-1">
+                <p class="text-sm text-muted-foreground">
+                    <strong class="text-foreground">Novo no sistema?</strong><br>
+                    Para criar uma nova conta, você pode se <a href="{{ route('register') }}" class="text-primary hover:underline font-medium">cadastrar aqui</a>. 
+                    Sua conta será ativada por um administrador antes que você possa fazer login.
+                </p>
+            </div>
+        </div>
+    </div>
 </x-guest-layout>

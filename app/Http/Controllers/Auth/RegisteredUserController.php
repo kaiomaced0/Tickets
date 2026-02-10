@@ -39,12 +39,11 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'active' => false,
         ]);
 
         event(new Registered($user));
 
-        Auth::login($user);
-
-        return redirect(route('dashboard', absolute: false));
+        return redirect()->route('login')->with('status', 'Cadastro realizado com sucesso! Aguarde a aprovação de um administrador para acessar o sistema.');
     }
 }

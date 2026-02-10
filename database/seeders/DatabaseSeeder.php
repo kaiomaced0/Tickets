@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
                 'password' => Hash::make('password'),
                 'api_token' => 'token-carlos',
                 'role' => 'USER',
+                'active' => true,
             ]),
             User::factory()->create([
                 'name' => 'Ana Santos',
@@ -30,6 +31,7 @@ class DatabaseSeeder extends Seeder
                 'password' => Hash::make('password'),
                 'api_token' => 'token-ana',
                 'role' => 'USER',
+                'active' => true,
             ]),
             User::factory()->create([
                 'name' => 'Paulo Costa',
@@ -37,6 +39,7 @@ class DatabaseSeeder extends Seeder
                 'password' => Hash::make('password'),
                 'api_token' => 'token-paulo',
                 'role' => 'USER',
+                'active' => true,
             ]),
             User::factory()->create([
                 'name' => 'Maria Oliveira',
@@ -44,6 +47,7 @@ class DatabaseSeeder extends Seeder
                 'password' => Hash::make('password'),
                 'api_token' => 'token-maria',
                 'role' => 'USER',
+                'active' => true,
             ]),
             User::factory()->create([
                 'name' => 'Roberto Lima',
@@ -51,6 +55,7 @@ class DatabaseSeeder extends Seeder
                 'password' => Hash::make('password'),
                 'api_token' => 'token-roberto',
                 'role' => 'USER',
+                'active' => true,
             ]),
             User::factory()->create([
                 'name' => 'Juliana Alves',
@@ -58,6 +63,7 @@ class DatabaseSeeder extends Seeder
                 'password' => Hash::make('password'),
                 'api_token' => 'token-juliana',
                 'role' => 'USER',
+                'active' => true,
             ]),
         ];
 
@@ -68,6 +74,7 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password'),
             'api_token' => 'token-techlead',
             'role' => 'ADMIN',
+            'active' => true,
         ]);
 
         $admin = User::factory()->admin()->create([
@@ -76,6 +83,7 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password'),
             'api_token' => 'token-fernando',
             'role' => 'ADMIN',
+            'active' => true,
         ]);
 
         $admins = [$techlead, $admin];
