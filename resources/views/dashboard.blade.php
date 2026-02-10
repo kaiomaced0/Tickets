@@ -29,25 +29,29 @@
                             'label' => 'Total',
                             'value' => $counts['total'] ?? 0,
                             'icon' => '<rect width="8" height="8" x="3" y="3" rx="2"/><path d="M7 11v4a2 2 0 0 0 2 2h4M11 7h4a2 2 0 0 1 2 2v4"/>',
-                            'bg' => 'bg-primary/10 text-primary'
+                            'bg' => 'bg-primary/10 text-primary',
+                            'url' => route('tickets.list')
                         ],
                         [
                             'label' => 'Abertos',
                             'value' => $counts['abertos'] ?? 0,
                             'icon' => '<circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>',
-                            'bg' => 'bg-blue-500/10 text-blue-400'
+                            'bg' => 'bg-blue-500/10 text-blue-400',
+                            'url' => route('tickets.list', ['status' => 'ABERTO'])
                         ],
                         [
                             'label' => 'Em andamento',
                             'value' => $counts['em_andamento'] ?? 0,
                             'icon' => '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
-                            'bg' => 'bg-amber-500/10 text-amber-400'
+                            'bg' => 'bg-amber-500/10 text-amber-400',
+                            'url' => route('tickets.list', ['status' => 'EM_ANDAMENTO'])
                         ],
                         [
                             'label' => 'Resolvidos',
                             'value' => $counts['resolvidos'] ?? 0,
                             'icon' => '<path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/>',
-                            'bg' => 'bg-green-500/10 text-green-400'
+                            'bg' => 'bg-green-500/10 text-green-400',
+                            'url' => route('tickets.list', ['status' => 'RESOLVIDO'])
                         ],
                     ];
 
@@ -57,7 +61,8 @@
                             'label' => 'Cancelados',
                             'value' => $counts['cancelados'],
                             'icon' => '<circle cx="12" cy="12" r="10"/><path d="m15 9-6 6M9 9l6 6"/>',
-                            'bg' => 'bg-neutral-500/15 text-neutral-300'
+                            'bg' => 'bg-neutral-500/15 text-neutral-300',
+                            'url' => route('tickets.list', ['status' => 'CANCELADO'])
                         ];
                     }
 
@@ -67,7 +72,7 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 {{ $gridCols }} gap-4">
                 @foreach ($cards as $card)
-                    <div class="rounded-xl border border-border/50 bg-card/60 shadow-sm hover:shadow-md hover:border-border transition-all">
+                    <a href="{{ $card['url'] }}" class="rounded-xl border border-border/50 bg-card/60 shadow-sm hover:shadow-md hover:border-border transition-all cursor-pointer">
                         <div class="p-4 flex items-center justify-between">
                             <div>
                                 <p class="text-xs text-muted-foreground">{{ $card['label'] }}</p>
@@ -79,7 +84,7 @@
                                 </svg>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 @endforeach
             </div>
 
@@ -91,6 +96,12 @@
                                 <h3 class="text-lg font-semibold text-foreground">Últimos tickets abertos</h3>
                                 <p class="text-sm text-muted-foreground">Últimos 6 registros</p>
                             </div>
+                            <a href="{{ route('tickets.list', ['status' => 'ABERTO']) }}" class="inline-flex items-center px-3 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
+                                Ver todos
+                                <svg class="ml-2 h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                                </svg>
+                            </a>
                         </div>
                     </div>
                     <div class="divide-y divide-border/50">
@@ -128,8 +139,18 @@
 
                 <div class="rounded-xl border border-border/50 bg-card/60 shadow-sm hover:shadow-md transition-shadow">
                     <div class="p-6 border-b border-border/50">
-                        <h3 class="text-lg font-semibold text-foreground">Meus tickets recentes</h3>
-                        <p class="text-sm text-muted-foreground">Últimos 6 onde você está envolvido</p>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-lg font-semibold text-foreground">Meus tickets recentes</h3>
+                                <p class="text-sm text-muted-foreground">Últimos 6 onde você está envolvido</p>
+                            </div>
+                            <a href="{{ route('tickets.list', ['q' => Auth::user()->name]) }}" class="inline-flex items-center px-3 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
+                                Ver todos
+                                <svg class="ml-2 h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                                </svg>
+                            </a>
+                        </div>
                     </div>
                     <div class="divide-y divide-border/50">
                         @forelse ($userInvolved as $ticket)
