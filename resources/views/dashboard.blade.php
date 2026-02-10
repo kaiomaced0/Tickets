@@ -106,7 +106,10 @@
                     </div>
                     <div class="divide-y divide-border/50">
                         @forelse ($latestOpened as $ticket)
-                            <div class="p-5 flex flex-col gap-2 hover:bg-accent/10 transition-colors cursor-pointer">
+                            <div
+                                onclick="window.location='{{ route('tickets.show-web', $ticket->id) }}'"
+                                class="p-5 flex flex-col gap-2 hover:bg-accent/10 transition-colors cursor-pointer"
+                            >
                                 <div class="flex items-center gap-2 text-xs text-muted-foreground">
                                     <span class="font-mono">#{{ $ticket->id }}</span>
                                     <span class="px-2 py-0.5 rounded-full {{ $statusLabels[$ticket->status]['color'] ?? 'bg-muted text-muted-foreground' }}">{{ $statusLabels[$ticket->status]['label'] ?? $ticket->status }}</span>
@@ -154,7 +157,10 @@
                     </div>
                     <div class="divide-y divide-border/50">
                         @forelse ($userInvolved as $ticket)
-                            <div class="p-5 flex flex-col gap-2 hover:bg-accent/10 transition-colors cursor-pointer">
+                            <div
+                                onclick="window.location='{{ route('tickets.show-web', $ticket->id) }}'"
+                                class="p-5 flex flex-col gap-2 hover:bg-accent/10 transition-colors cursor-pointer"
+                            >
                                 <div class="flex items-center gap-2 text-xs text-muted-foreground">
                                     <span class="font-mono">#{{ $ticket->id }}</span>
                                     <span class="px-2 py-0.5 rounded-full {{ $statusLabels[$ticket->status]['color'] ?? 'bg-muted text-muted-foreground' }}">{{ $statusLabels[$ticket->status]['label'] ?? $ticket->status }}</span>

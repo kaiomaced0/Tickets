@@ -23,6 +23,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/settings/theme', [SettingsController::class, 'updateTheme'])->name('settings.theme');
 
     Route::get('/tickets', [TicketController::class, 'webIndex'])->name('tickets.list');
+    Route::get('/tickets/create', [TicketController::class, 'webCreate'])->name('tickets.create-web');
+    Route::post('/tickets/create', [TicketController::class, 'webStore'])->name('tickets.store-web');
+    Route::get('/tickets/{ticket}/view', [TicketController::class, 'webShow'])->name('tickets.show-web');
+    Route::patch('/tickets/{ticket}/view', [TicketController::class, 'webUpdate'])->name('tickets.update-web');
     Route::patch('/tickets/{ticket}/status', [TicketController::class, 'updateStatus'])->name('tickets.update-status');
     Route::resource('tickets', TicketController::class)->except(['index', 'create', 'edit']);
 });

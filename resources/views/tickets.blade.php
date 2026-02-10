@@ -33,10 +33,10 @@
                                 <label for="q" class="block text-sm font-medium text-foreground mb-1">
                                     Buscar
                                 </label>
-                                <input 
-                                    type="text" 
-                                    id="q" 
-                                    name="q" 
+                                <input
+                                    type="text"
+                                    id="q"
+                                    name="q"
                                     value="{{ $filters['q'] ?? '' }}"
                                     placeholder="Título, descrição ou usuário..."
                                     class="w-full rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary"
@@ -48,8 +48,8 @@
                                 <label for="status" class="block text-sm font-medium text-foreground mb-1">
                                     Status
                                 </label>
-                                <select 
-                                    id="status" 
+                                <select
+                                    id="status"
                                     name="status"
                                     class="w-full rounded-lg border border-border bg-background text-foreground focus:border-primary focus:ring-primary"
                                 >
@@ -67,8 +67,8 @@
                                 <label for="prioridade" class="block text-sm font-medium text-foreground mb-1">
                                     Prioridade
                                 </label>
-                                <select 
-                                    id="prioridade" 
+                                <select
+                                    id="prioridade"
                                     name="prioridade"
                                     class="w-full rounded-lg border border-border bg-background text-foreground focus:border-primary focus:ring-primary"
                                 >
@@ -88,8 +88,8 @@
                                 <label for="user_type" class="block text-sm font-medium text-foreground mb-1">
                                     Filtrar por
                                 </label>
-                                <select 
-                                    id="user_type" 
+                                <select
+                                    id="user_type"
                                     name="user_type"
                                     class="w-full rounded-lg border border-border bg-background text-foreground focus:border-primary focus:ring-primary"
                                 >
@@ -109,10 +109,10 @@
                                     Usuário
                                 </label>
                                 <div class="flex gap-2">
-                                    <input 
-                                        type="text" 
-                                        id="user_filter" 
-                                        name="user_filter" 
+                                    <input
+                                        type="text"
+                                        id="user_filter"
+                                        name="user_filter"
                                         value="{{ $filters['user_filter'] ?? '' }}"
                                         placeholder="Digite um nome ou 'me'"
                                         list="users-list"
@@ -131,23 +131,31 @@
                             </div>
                         </div>
 
-                        <div class="flex items-center justify-end gap-3">
-                            <a 
-                                href="{{ route('tickets.list') }}"
-                                class="inline-flex items-center px-4 py-2 rounded-lg border border-border bg-secondary text-foreground text-sm font-medium hover:bg-secondary/80 transition-colors"
-                            >
-                                Limpar Filtros
-                            </a>
-                            <button 
-                                type="submit"
-                                class="inline-flex items-center px-5 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
-                            >
+                        <div class="flex items-center justify-between gap-3">
+                            <a href="{{ route('tickets.create-web') }}" class="inline-flex items-center px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
                                 <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-                                    <circle cx="11" cy="11" r="8"/>
-                                    <path d="m21 21-4.35-4.35"/>
+                                    <path d="M12 5v14M5 12h14"/>
                                 </svg>
-                                Buscar
-                            </button>
+                                Novo Ticket
+                            </a>
+                            <div class="flex items-center gap-3">
+                                <a
+                                    href="{{ route('tickets.list') }}"
+                                    class="inline-flex items-center px-4 py-2 rounded-lg border border-border bg-secondary text-foreground text-sm font-medium hover:bg-secondary/80 transition-colors"
+                                >
+                                    Limpar Filtros
+                                </a>
+                                <button
+                                    type="submit"
+                                    class="inline-flex items-center px-5 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+                                >
+                                    <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                        <circle cx="11" cy="11" r="8"/>
+                                        <path d="m21 21-4.35-4.35"/>
+                                    </svg>
+                                    Buscar
+                                </button>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -182,7 +190,10 @@
                             </thead>
                             <tbody class="divide-y divide-border">
                                 @foreach($tickets as $ticket)
-                                    <tr class="hover:bg-muted/30 transition-colors cursor-pointer">
+                                    <tr
+                                        onclick="window.location='{{ route('tickets.show-web', $ticket->id) }}'"
+                                        class="hover:bg-muted/30 transition-colors cursor-pointer"
+                                    >
                                         <td class="px-6 py-4">
                                             <div class="text-sm font-medium text-foreground">
                                                 {{ $ticket->titulo }}

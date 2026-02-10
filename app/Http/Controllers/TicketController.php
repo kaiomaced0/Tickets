@@ -84,6 +84,47 @@ class TicketController extends Controller
         ]);
     }
 
+    public function webCreate(): View
+    {
+        $users = User::where('active', true)->orderBy('name')->get();
+
+        return view('tickets.create', [
+            'users' => $users,
+            'statuses' => ['ABERTO', 'EM_ANDAMENTO', 'RESOLVIDO', 'CANCELADO'],
+            'prioridades' => ['BAIXA', 'MEDIA', 'ALTA'],
+        ]);
+    }
+
+    public function webStore(StoreTicketRequest $request)
+    {
+        $ticket = $this->createService->handle($request->validated(), $request->user());
+
+        return redirect()->route('tickets.show-web', $ticket->id)
+            ->with('success', 'Ticket criado com sucesso!');
+    }
+
+    public function webShow(int $ticket): View
+    {
+        $ticketModel = $this->showService->handle($ticket);
+        $users = User::where('active', true)->orderBy('name')->get();
+
+        return view('tickets.show', [
+            'ticket' => $ticketModel,
+            'users' => $users,
+            'statuses' => ['ABERTO', 'EM_ANDAMENTO', 'RESOLVIDO', 'CANCELADO'],
+            'prioridades' => ['BAIXA', 'MEDIA', 'ALTA'],
+        ]);
+    }
+
+    public function webUpdate(UpdateTicketRequest $request, int $ticket)
+    {
+        $ticketModel = $this->showService->handle($ticket);
+        $updated = $this->updateService->handle($ticketModel, $request->validated());
+
+        return redirect()->route('tickets.show-web', $updated->id)
+            ->with('success', 'Ticket atualizado com sucesso!');
+    }
+
     public function store(StoreTicketRequest $request): JsonResponse
     {
         $ticket = $this->createService->handle($request->validated(), $request->user());
