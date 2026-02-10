@@ -72,7 +72,7 @@ class TicketController extends Controller
             }
         }
 
-        $tickets = $this->listService->handle(null, array_filter($filters), 15);
+        $tickets = $this->listService->handle(Auth::user(), array_filter($filters), 15);
         $users = User::where('active', true)->orderBy('name')->get();
 
         return view('tickets', [

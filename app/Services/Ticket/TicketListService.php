@@ -16,8 +16,23 @@ class TicketListService
     {
         $query = Ticket::query()->latest();
 
-        if ($user && empty($filters['solicitante_id'])) {
-            $query->where('solicitante_id', $user->id);
+        // Lógica de permissão para tickets cancelados
+        if ($user && $user->role !== 'ADMIN') {
+            // Se está buscando especificamente por CANCELADO ou não há filtro de status
+            // Usuários comuns só veem cancelados onde estão envolvidos
+            $query->where(function ($q) use ($user, $filters) {
+                // Tickets não cancelados: sem restrição
+                $q->where('status', '!=', 'CANCELADO');
+
+                // OU tickets cancelados onde o usuário está envolvido
+                $q->orWhere(function ($subQuery) use ($user) {
+                    $subQuery->where('status', 'CANCELADO')
+                        ->where(function ($involvementQuery) use ($user) {
+                            $involvementQuery->where('solicitante_id', $user->id)
+                                ->orWhere('responsavel_id', $user->id);
+                        });
+                });
+            });
         }
 
         if (! empty($filters['status'])) {
