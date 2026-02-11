@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\User\UserListService;
 use App\Services\User\UserCreateService;
@@ -31,7 +32,7 @@ class UserApiController extends Controller
         $users = $this->listService->handle($filters, $perPage);
 
         return response()->json([
-            'data' => $users->items(),
+            'data' => UserResource::collection($users->items()),
             'meta' => [
                 'total' => $users->total(),
                 'per_page' => $users->perPage(),
@@ -56,12 +57,14 @@ class UserApiController extends Controller
 
         $user = $this->createService->handle($validated);
 
-        return response()->json($user, 201);
+        return (new UserResource($user))
+            ->response()
+            ->setStatusCode(201);
     }
 
     public function show(User $user): JsonResponse
     {
-        return response()->json($user);
+        return response()->json(new UserResource($user));
     }
 
     public function update(Request $request, User $user): JsonResponse
@@ -78,7 +81,7 @@ class UserApiController extends Controller
 
         $updated = $this->updateService->handle($user, $validated);
 
-        return response()->json($updated);
+        return response()->json(new UserResource($updated));
     }
 
     public function toggleActive(User $user): JsonResponse
@@ -88,7 +91,7 @@ class UserApiController extends Controller
 
             return response()->json([
                 'success' => true,
-                'data' => $updatedUser,
+                'data' => new UserResource($updatedUser),
                 'message' => $updatedUser->active ? 'Usuário ativado com sucesso!' : 'Usuário desativado com sucesso!'
             ]);
         } catch (\Exception $e) {

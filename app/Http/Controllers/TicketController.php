@@ -6,6 +6,7 @@ use App\Http\Requests\ListTicketsRequest;
 use App\Http\Requests\StoreTicketRequest;
 use App\Http\Requests\UpdateTicketRequest;
 use App\Http\Requests\UpdateTicketStatusRequest;
+use App\Http\Resources\TicketResource;
 use App\Services\Ticket\TicketCreateService;
 use App\Services\Ticket\TicketToggleActiveService;
 use App\Services\Ticket\TicketFilterService;
@@ -40,7 +41,7 @@ class TicketController extends Controller
         $tickets = $this->listService->handle(Auth::user(), $filters, $perPage);
 
         return response()->json([
-            'data' => $tickets->items(),
+            'data' => TicketResource::collection($tickets->items()),
             'meta' => [
                 'total' => $tickets->total(),
                 'per_page' => $tickets->perPage(),
@@ -119,14 +120,16 @@ class TicketController extends Controller
     {
         $ticket = $this->createService->handle($request->validated(), $request->user());
 
-        return response()->json($ticket, 201);
+        return (new TicketResource($ticket->load('solicitante', 'responsavel')))
+            ->response()
+            ->setStatusCode(201);
     }
 
     public function show(int $ticket): JsonResponse
     {
         $ticketModel = $this->showService->handle($ticket);
 
-        return response()->json($ticketModel);
+        return response()->json(new TicketResource($ticketModel->load('solicitante', 'responsavel')));
     }
 
     public function update(UpdateTicketRequest $request, int $ticket): JsonResponse
@@ -134,7 +137,7 @@ class TicketController extends Controller
         $ticketModel = $this->showService->handle($ticket);
         $updated = $this->updateService->handle($ticketModel, $request->validated());
 
-        return response()->json($updated);
+        return response()->json(new TicketResource($updated->load('solicitante', 'responsavel')));
     }
 
     public function updateStatus(UpdateTicketStatusRequest $request, int $ticket): JsonResponse
@@ -142,7 +145,7 @@ class TicketController extends Controller
         $ticketModel = $this->showService->handle($ticket);
         $updated = $this->statusService->handle($ticketModel, $request->validated('status'), $request->user());
 
-        return response()->json($updated);
+        return response()->json(new TicketResource($updated->load('solicitante', 'responsavel')));
     }
 
     public function destroy(int $ticket): JsonResponse
@@ -152,7 +155,7 @@ class TicketController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $updated,
+            'data' => new TicketResource($updated->load('solicitante', 'responsavel')),
             'message' => $updated->active ? 'Ticket ativado com sucesso!' : 'Ticket inativado com sucesso!'
         ]);
     }
