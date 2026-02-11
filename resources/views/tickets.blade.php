@@ -223,16 +223,29 @@
                                             </div>
                                         </td>
                                         <td class="px-6 py-4">
-                                            <div class="flex items-center">
-                                                <div class="h-8 w-8 rounded-full bg-secondary/50 text-foreground flex items-center justify-center text-xs font-medium">
-                                                    {{ strtoupper(substr($ticket->responsavel->name, 0, 2)) }}
-                                                </div>
-                                                <div class="ml-3">
-                                                    <div class="text-sm text-foreground">
-                                                        {{ $ticket->responsavel->name }}
+                                            @if($ticket->responsavel)
+                                                <div class="flex items-center">
+                                                    <div class="h-8 w-8 rounded-full bg-secondary/50 text-foreground flex items-center justify-center text-xs font-medium">
+                                                        {{ strtoupper(substr($ticket->responsavel->name, 0, 2)) }}
+                                                    </div>
+                                                    <div class="ml-3">
+                                                        <div class="text-sm text-foreground">
+                                                            {{ $ticket->responsavel->name }}
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            @else
+                                                <div class="flex items-center">
+                                                    <div class="h-8 w-8 rounded-full bg-muted border border-border flex items-center justify-center text-xs font-medium text-muted-foreground">
+                                                        --
+                                                    </div>
+                                                    <div class="ml-3">
+                                                        <div class="text-sm text-muted-foreground italic">
+                                                            Não atribuído
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endif
                                         </td>
                                         <td class="px-6 py-4 text-sm text-muted-foreground">
                                             {{ $ticket->created_at->format('d/m/Y') }}
