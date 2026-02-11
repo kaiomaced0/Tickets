@@ -10,7 +10,7 @@ class ProfileTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_profile_page_is_displayed(): void
+    public function test_pagina_de_perfil_exibida(): void
     {
         $user = User::factory()->create();
 
@@ -21,7 +21,7 @@ class ProfileTest extends TestCase
         $response->assertOk();
     }
 
-    public function test_profile_information_can_be_updated(): void
+    public function test_informacoes_de_perfil_podem_ser_atualizadas(): void
     {
         $user = User::factory()->create();
 
@@ -43,7 +43,7 @@ class ProfileTest extends TestCase
         $this->assertNull($user->email_verified_at);
     }
 
-    public function test_email_verification_status_is_unchanged_when_the_email_address_is_unchanged(): void
+    public function test_status_de_verificacao_de_email_inalterado_quando_email_nao_muda(): void
     {
         $user = User::factory()->create();
 
@@ -61,7 +61,7 @@ class ProfileTest extends TestCase
         $this->assertNotNull($user->refresh()->email_verified_at);
     }
 
-    public function test_user_can_deactivate_their_account(): void
+    public function test_usuario_pode_desativar_sua_conta(): void
     {
         $user = User::factory()->create();
 
@@ -82,7 +82,7 @@ class ProfileTest extends TestCase
         $this->assertFalse($user->active);
     }
 
-    public function test_correct_password_must_be_provided_to_deactivate_account(): void
+    public function test_senha_correta_deve_ser_fornecida_para_desativar_conta(): void
     {
         $user = User::factory()->create();
 

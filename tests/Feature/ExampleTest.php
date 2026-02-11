@@ -8,9 +8,9 @@ use Tests\TestCase;
 class ExampleTest extends TestCase
 {
     /**
-     * A basic test example.
+     * Um teste básico de exemplo.
      */
-    public function test_the_application_returns_a_successful_response(): void
+    public function test_aplicacao_retorna_resposta_bem_sucedida(): void
     {
         $response = $this->get('/');
 
