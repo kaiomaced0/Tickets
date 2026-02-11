@@ -6,11 +6,26 @@ use App\Enums\Prioridade;
 use App\Enums\TicketStatus;
 use App\Models\Ticket;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class TicketUpdateService
 {
     public function handle(Ticket $ticket, array $data): Ticket
     {
+        // Validar auto-atribuição de USER quando já existe responsável
+        if (isset($data['responsavel_id'])) {
+            $user = Auth::user();
+            $isUser = $user->role === 'USER';
+            $isTryingSelfAssign = $data['responsavel_id'] == $user->id;
+            $alreadyHasResponsavel = !empty($ticket->responsavel_id) && $ticket->responsavel_id != $user->id;
+
+            if ($isUser && $isTryingSelfAssign && $alreadyHasResponsavel) {
+                throw ValidationException::withMessages([
+                    'responsavel_id' => 'Este ticket já possui um responsável atribuído. Apenas administradores podem alterar.'
+                ]);
+            }
+        }
+
         // Detectar mudança de status para criar log
         $statusChanged = false;
         $fromStatus = null;

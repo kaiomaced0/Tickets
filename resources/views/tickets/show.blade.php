@@ -20,7 +20,8 @@
     $canEditBasic = $isAdmin || $isSolicitante; // Título e descrição
     $canEditClassification = $isAdmin || $isSolicitante || $isResponsavel; // Prioridade e status
     $canEditUsers = $isAdmin; // Solicitante e responsável
-    $canSelfAssign = Auth::user()->role === 'USER' && !$isResponsavel; // USER pode se auto-atribuir
+    // USER só pode se auto-atribuir se ainda não houver responsável
+    $canSelfAssign = Auth::user()->role === 'USER' && !$isResponsavel && empty($ticket->responsavel_id);
 @endphp
 
 <x-app-layout>
@@ -158,30 +159,37 @@
                                 <!-- Responsável -->
                                 <div>
                                     <x-input-label for="responsavel_id" value="Responsável" />
-                                    @if($canEditUsers || $canSelfAssign)
+                                    @if($canEditUsers)
                                         <select
                                             id="responsavel_id"
                                             name="responsavel_id"
                                             class="mt-1 block w-full rounded-lg border border-border bg-background text-foreground focus:border-primary focus:ring-primary"
                                         >
                                             <option value="">Nenhum responsável</option>
-                                            @if($canEditUsers)
-                                                @foreach($users as $user)
-                                                    <option value="{{ $user->id }}" {{ old('responsavel_id', $ticket->responsavel_id) == $user->id ? 'selected' : '' }}>
-                                                        {{ $user->name }}
-                                                    </option>
-                                                @endforeach
-                                            @elseif($canSelfAssign)
-                                                <option value="{{ Auth::id() }}" {{ old('responsavel_id', $ticket->responsavel_id) == Auth::id() ? 'selected' : '' }}>
-                                                    {{ Auth::user()->name }} (Eu)
+                                            @foreach($users as $user)
+                                                <option value="{{ $user->id }}" {{ old('responsavel_id', $ticket->responsavel_id) == $user->id ? 'selected' : '' }}>
+                                                    {{ $user->name }}
                                                 </option>
-                                            @endif
+                                            @endforeach
                                         </select>
+                                        <x-input-error class="mt-2" :messages="$errors->get('responsavel_id')" />
+                                    @elseif($canSelfAssign)
+                                        <select
+                                            id="responsavel_id"
+                                            name="responsavel_id"
+                                            class="mt-1 block w-full rounded-lg border border-border bg-background text-foreground focus:border-primary focus:ring-primary"
+                                        >
+                                            <option value="">Nenhum responsável</option>
+                                            <option value="{{ Auth::id() }}">
+                                                {{ Auth::user()->name }} (Me atribuir)
+                                            </option>
+                                        </select>
+                                        <p class="mt-1 text-xs text-muted-foreground">Você pode se atribuir como responsável deste ticket</p>
                                         <x-input-error class="mt-2" :messages="$errors->get('responsavel_id')" />
                                     @else
                                         @if($ticket->responsavel)
-                                            <div class="mt-2 flex items-center gap-3">
-                                                <div class="h-10 w-10 rounded-full bg-secondary/50 text-foreground flex items-center justify-center text-sm font-medium">
+                                            <div class="mt-2 flex items-center gap-3 p-3 bg-secondary/30 rounded-lg border border-border/50">
+                                                <div class="h-10 w-10 rounded-full bg-primary/20 text-primary flex items-center justify-center text-sm font-medium">
                                                     {{ strtoupper(substr($ticket->responsavel->name, 0, 2)) }}
                                                 </div>
                                                 <div>
@@ -189,6 +197,14 @@
                                                     <p class="text-xs text-muted-foreground">{{ $ticket->responsavel->email }}</p>
                                                 </div>
                                             </div>
+                                            @if(Auth::user()->role === 'USER' && !$isResponsavel)
+                                                <p class="mt-2 text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+                                                    </svg>
+                                                    Este ticket já possui um responsável. Apenas admins podem alterar.
+                                                </p>
+                                            @endif
                                         @else
                                             <p class="mt-2 text-sm text-muted-foreground italic">Nenhum responsável atribuído</p>
                                         @endif
