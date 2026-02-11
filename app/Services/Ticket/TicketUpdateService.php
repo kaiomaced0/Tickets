@@ -5,11 +5,16 @@ namespace App\Services\Ticket;
 use App\Enums\Prioridade;
 use App\Enums\TicketStatus;
 use App\Models\Ticket;
+use App\Services\Email\EmailService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
 class TicketUpdateService
 {
+    public function __construct(
+        protected EmailService $emailService,
+    ) {}
+
     public function handle(Ticket $ticket, array $data): Ticket
     {
         // Validar auto-atribuição de USER quando já existe responsável
@@ -48,6 +53,11 @@ class TicketUpdateService
                 'from_status' => $fromStatus,
                 'to_status' => $ticket->status,
             ]);
+
+            // Dispara notificação via fila quando status muda para RESOLVIDO
+            if ($ticket->status === TicketStatus::RESOLVIDO->value) {
+                $this->emailService->notificarTicketResolvido($ticket);
+            }
         }
 
         return $ticket;

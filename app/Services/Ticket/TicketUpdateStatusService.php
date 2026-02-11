@@ -5,9 +5,14 @@ namespace App\Services\Ticket;
 use App\Enums\TicketStatus;
 use App\Models\Ticket;
 use App\Models\User;
+use App\Services\Email\EmailService;
 
 class TicketUpdateStatusService
 {
+    public function __construct(
+        protected EmailService $emailService,
+    ) {}
+
     public function handle(Ticket $ticket, string $status, User $user): Ticket
     {
         $statusEnum = TicketStatus::tryFromMixed($status) ?? TicketStatus::ABERTO;
@@ -27,6 +32,11 @@ class TicketUpdateStatusService
             'from_status' => $fromStatus,
             'to_status' => $ticket->status,
         ]);
+
+        // Dispara notificação via fila quando status muda para RESOLVIDO
+        if ($statusEnum === TicketStatus::RESOLVIDO) {
+            $this->emailService->notificarTicketResolvido($ticket);
+        }
 
         return $ticket;
     }
