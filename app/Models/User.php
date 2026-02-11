@@ -50,11 +50,20 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'role' => 'string',
+            'active' => 'boolean',
         ];
     }
 
     public function isAdmin(): bool
     {
         return $this->role === 'ADMIN';
+    }
+
+    /**
+     * Verifica se o usuário está ativo.
+     */
+    public function isActive(): bool
+    {
+        return $this->active === true;
     }
 }

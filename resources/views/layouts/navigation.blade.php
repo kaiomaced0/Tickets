@@ -21,6 +21,9 @@
                 <div class="hidden md:flex items-center gap-2 text-sm ms-4">
                     <a href="{{ route('dashboard') }}" class="px-3 py-2 rounded-lg transition {{ request()->routeIs('dashboard') ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/40' }}">Dashboard</a>
                     <a href="{{ route('tickets.list') }}" class="px-3 py-2 rounded-lg transition {{ request()->routeIs('tickets.*') ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/40' }}">Tickets</a>
+                    @if(Auth::user()->isAdmin())
+                        <a href="{{ route('admin.index') }}" class="px-3 py-2 rounded-lg transition {{ request()->routeIs('admin.*') ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/40' }}">Admin</a>
+                    @endif
                 </div>
             </div>
 
@@ -96,6 +99,11 @@
             <x-responsive-nav-link :href="route('tickets.list')" :active="request()->routeIs('tickets.*')">
                 Tickets
             </x-responsive-nav-link>
+            @if(Auth::user()->isAdmin())
+                <x-responsive-nav-link :href="route('admin.index')" :active="request()->routeIs('admin.*')">
+                    Admin
+                </x-responsive-nav-link>
+            @endif
         </div>
 
         <div class="pt-3 pb-4 border-t border-border/70 px-4 space-y-2">

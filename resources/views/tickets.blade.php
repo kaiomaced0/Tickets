@@ -108,46 +108,38 @@
                                 <label for="user_filter" class="block text-sm font-medium text-foreground mb-1">
                                     Usuário
                                 </label>
-                                <div class="flex gap-2">
-                                    <input
-                                        type="text"
-                                        id="user_filter"
-                                        name="user_filter"
-                                        value="{{ $filters['user_filter'] ?? '' }}"
-                                        placeholder="Digite um nome ou 'me'"
-                                        list="users-list"
-                                        class="flex-1 rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary"
-                                    />
-                                    <datalist id="users-list">
-                                        <option value="me">Eu</option>
-                                        @foreach($users as $user)
-                                            <option value="{{ $user->name }}">
-                                        @endforeach
-                                    </datalist>
-                                </div>
+                                <input
+                                    type="text"
+                                    id="user_filter"
+                                    name="user_filter"
+                                    value="{{ $filters['user_filter'] ?? '' }}"
+                                    placeholder="Digite um nome ou 'me'"
+                                    list="users-list"
+                                    class="w-full rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary"
+                                />
+                                <datalist id="users-list">
+                                    <option value="me">Eu</option>
+                                    @foreach($users as $user)
+                                        <option value="{{ $user->name }}">
+                                    @endforeach
+                                </datalist>
                                 <p class="mt-1 text-xs text-muted-foreground">
                                     Digite "me" para seus tickets ou o nome de um usuário
                                 </p>
                             </div>
                         </div>
 
-                        <div class="flex items-center justify-between gap-3">
-                            <a href="{{ route('tickets.create-web') }}" class="inline-flex items-center px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
-                                <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-                                    <path d="M12 5v14M5 12h14"/>
-                                </svg>
-                                Novo Ticket
+                        <div class="flex items-center justify-between gap-3 pt-2">
+                            <a
+                                href="{{ route('tickets.list') }}"
+                                class="inline-flex items-center px-4 py-2 rounded-lg border border-border/70 bg-muted/30 text-foreground text-sm font-medium hover:bg-muted/50 transition-colors"
+                            >
+                                Limpar Filtros
                             </a>
-                            <div class="flex items-center gap-3">
-                                <a
-                                    href="{{ route('tickets.list') }}"
-                                    class="inline-flex items-center px-4 py-2 rounded-lg border border-border bg-secondary text-foreground text-sm font-medium hover:bg-secondary/80 transition-colors"
-                                >
-                                    Limpar Filtros
-                                </a>
+                            <div class="flex gap-2">
                                 <button
                                     type="submit"
-                                    class="inline-flex items-center px-5 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+                                    class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-primary/15 border border-primary/30 text-primary text-sm font-medium hover:bg-primary/25 transition-colors whitespace-nowrap"
                                 >
                                     <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                                         <circle cx="11" cy="11" r="8"/>
@@ -155,6 +147,12 @@
                                     </svg>
                                     Buscar
                                 </button>
+                                <a href="{{ route('tickets.create-web') }}" class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-primary border border-primary/30 text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors shadow-sm whitespace-nowrap">
+                                    <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                        <path d="M12 5v14M5 12h14"/>
+                                    </svg>
+                                    Novo Ticket
+                                </a>
                             </div>
                         </div>
                     </form>

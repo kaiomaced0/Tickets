@@ -3,6 +3,8 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -29,6 +31,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/tickets/{ticket}/view', [TicketController::class, 'webUpdate'])->name('tickets.update-web');
     Route::patch('/tickets/{ticket}/status', [TicketController::class, 'updateStatus'])->name('tickets.update-status');
     Route::resource('tickets', TicketController::class)->except(['index', 'create', 'edit']);
+
+    // Rotas Admin (apenas para administradores)
+    Route::middleware(['admin'])->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/', [AdminController::class, 'index'])->name('index');
+
+        Route::get('/users', [UserController::class, 'index'])->name('users.index');
+        Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
+        Route::post('/users', [UserController::class, 'store'])->name('users.store');
+        Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
+        Route::patch('/users/{user}', [UserController::class, 'update'])->name('users.update');
+        Route::post('/users/{user}/toggle-active', [UserController::class, 'toggleActive'])->name('users.toggle-active');
+    });
 });
 
 require __DIR__.'/auth.php';
