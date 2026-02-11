@@ -1,30 +1,30 @@
 <section class="space-y-6">
     <header>
         <h2 class="text-lg font-medium text-foreground">
-            Excluir Conta
+            Desativar Conta
         </h2>
 
         <p class="mt-1 text-sm text-muted-foreground">
-            Uma vez que sua conta for excluída, todos os seus recursos e dados serão permanentemente excluídos. Antes de excluir sua conta, por favor baixe quaisquer dados ou informações que deseja manter.
+            Ao desativar sua conta, você não poderá mais acessar o sistema. Um administrador poderá reativá-la posteriormente se necessário.
         </p>
     </header>
 
     <x-danger-button
         x-data=""
         x-on:click.prevent="$dispatch('open-modal', 'confirm-user-deletion')"
-    >Excluir Conta</x-danger-button>
+    >Desativar Conta</x-danger-button>
 
     <x-modal name="confirm-user-deletion" :show="$errors->userDeletion->isNotEmpty()" focusable>
         <form method="post" action="{{ route('profile.destroy') }}" class="p-6">
             @csrf
-            @method('delete')
+            @method('patch')
 
             <h2 class="text-lg font-medium text-foreground">
-                Tem certeza de que deseja excluir sua conta?
+                Tem certeza de que deseja desativar sua conta?
             </h2>
 
             <p class="mt-1 text-sm text-muted-foreground">
-                Uma vez que sua conta for excluída, todos os seus recursos e dados serão permanentemente excluídos. Por favor, digite sua senha para confirmar que deseja excluir permanentemente sua conta.
+                Ao desativar sua conta, você será desconectado e não poderá fazer login até que um administrador reative sua conta. Por favor, digite sua senha para confirmar.
             </p>
 
             <div class="mt-6">
@@ -47,7 +47,7 @@
                 </x-secondary-button>
 
                 <x-danger-button class="ms-3">
-                    Excluir Conta
+                    Desativar Conta
                 </x-danger-button>
             </div>
         </form>

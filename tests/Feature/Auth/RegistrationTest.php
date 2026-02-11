@@ -25,7 +25,15 @@ class RegistrationTest extends TestCase
             'password_confirmation' => 'password',
         ]);
 
-        $this->assertAuthenticated();
-        $response->assertRedirect(route('dashboard', absolute: false));
+        // Novos usuários não são autenticados automaticamente
+        // Eles precisam de aprovação de um administrador
+        $this->assertGuest();
+        $response->assertRedirect(route('login', absolute: false));
+
+        // Verificar que o usuário foi criado como inativo
+        $this->assertDatabaseHas('users', [
+            'email' => 'test@example.com',
+            'active' => false,
+        ]);
     }
 }
