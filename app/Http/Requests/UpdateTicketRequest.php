@@ -15,9 +15,12 @@ class UpdateTicketRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        $this->merge([
-            'prioridade' => Prioridade::tryFromMixed($this->input('prioridade'))?->value,
-        ]);
+        // Só fazer merge se a prioridade foi enviada
+        if ($this->has('prioridade')) {
+            $this->merge([
+                'prioridade' => Prioridade::tryFromMixed($this->input('prioridade'))?->value,
+            ]);
+        }
     }
 
     public function rules(): array

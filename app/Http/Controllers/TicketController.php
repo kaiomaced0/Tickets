@@ -7,7 +7,7 @@ use App\Http\Requests\StoreTicketRequest;
 use App\Http\Requests\UpdateTicketRequest;
 use App\Http\Requests\UpdateTicketStatusRequest;
 use App\Services\Ticket\TicketCreateService;
-use App\Services\Ticket\TicketDeleteService;
+use App\Services\Ticket\TicketToggleActiveService;
 use App\Services\Ticket\TicketFilterService;
 use App\Services\Ticket\TicketListService;
 use App\Services\Ticket\TicketShowService;
@@ -26,7 +26,7 @@ class TicketController extends Controller
         private readonly TicketCreateService $createService,
         private readonly TicketShowService $showService,
         private readonly TicketUpdateService $updateService,
-        private readonly TicketDeleteService $deleteService,
+        private readonly TicketToggleActiveService $toggleActiveService,
         private readonly TicketUpdateStatusService $statusService,
         private readonly TicketFilterService $filterService,
     ) {
@@ -148,8 +148,12 @@ class TicketController extends Controller
     public function destroy(int $ticket): JsonResponse
     {
         $ticketModel = $this->showService->handle($ticket);
-        $this->deleteService->handle($ticketModel, Auth::user());
+        $updated = $this->toggleActiveService->handle($ticketModel, Auth::user());
 
-        return response()->json([], 204);
+        return response()->json([
+            'success' => true,
+            'data' => $updated,
+            'message' => $updated->active ? 'Ticket ativado com sucesso!' : 'Ticket inativado com sucesso!'
+        ]);
     }
 }
