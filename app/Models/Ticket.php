@@ -8,10 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Ticket extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'solicitante_id',
@@ -53,16 +54,5 @@ class Ticket extends Model
     public function scopeWithInactive(Builder $query): Builder
     {
         return $query->withoutGlobalScope('active');
-    }
-
-    public function delete(): bool
-    {
-        if (! $this->exists) {
-            return false;
-        }
-
-        $this->active = false;
-
-        return $this->saveQuietly();
     }
 }
