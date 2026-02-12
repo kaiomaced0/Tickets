@@ -84,15 +84,16 @@ class UserApiController extends Controller
         return response()->json(new UserResource($updated));
     }
 
-    public function toggleActive(User $user): JsonResponse
+    public function toggleActive(int $id): JsonResponse
     {
         try {
+            $user = User::withTrashed()->findOrFail($id);
             $updatedUser = $this->toggleActiveService->handle($user, Auth::user());
 
             return response()->json([
                 'success' => true,
                 'data' => new UserResource($updatedUser),
-                'message' => $updatedUser->active ? 'Usuário ativado com sucesso!' : 'Usuário desativado com sucesso!'
+                'message' => $updatedUser->isActive() ? 'Usuário ativado com sucesso!' : 'Usuário desativado com sucesso!'
             ]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 400);

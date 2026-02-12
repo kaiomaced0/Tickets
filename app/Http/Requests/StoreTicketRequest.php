@@ -6,12 +6,13 @@ use App\Enums\Prioridade;
 use App\Enums\TicketStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use App\Models\Ticket;
 
 class StoreTicketRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('create', Ticket::class);
     }
 
     protected function prepareForValidation(): void

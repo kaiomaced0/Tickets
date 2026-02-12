@@ -11,9 +11,12 @@ class UserToggleActiveService
     {
         Gate::forUser($currentUser)->authorize('toggleActive', $user);
 
-        $user->active = !$user->active;
-        $user->save();
+        if ($user->trashed()) {
+            $user->restore();
+        } else {
+            $user->delete();
+        }
 
-        return $user;
+        return $user->fresh();
     }
 }

@@ -75,15 +75,16 @@ class UserController extends Controller
             ->with('success', 'Usuário atualizado com sucesso!');
     }
 
-    public function toggleActive(User $user)
+    public function toggleActive(int $id)
     {
         try {
+            $user = User::withTrashed()->findOrFail($id);
             $updatedUser = $this->toggleActiveService->handle($user, Auth::user());
 
             return response()->json([
                 'success' => true,
-                'active' => $updatedUser->active,
-                'message' => $updatedUser->active ? 'Usuário ativado com sucesso!' : 'Usuário desativado com sucesso!'
+                'active' => $updatedUser->isActive(),
+                'message' => $updatedUser->isActive() ? 'Usuário ativado com sucesso!' : 'Usuário desativado com sucesso!'
             ]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 400);

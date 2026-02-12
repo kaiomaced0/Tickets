@@ -43,9 +43,9 @@ class UserFactory extends Factory
 
     public function inactive(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'active' => false,
-        ]);
+        return $this->state(function (array $attributes) {
+            return ['deleted_at' => now()];
+        });
     }
 
     /**

@@ -156,7 +156,7 @@ class TicketController extends Controller
         return response()->json([
             'success' => true,
             'data' => new TicketResource($updated->load('solicitante', 'responsavel')),
-            'message' => $updated->active ? 'Ticket ativado com sucesso!' : 'Ticket inativado com sucesso!'
+            'message' => !$updated->trashed() ? 'Ticket ativado com sucesso!' : 'Ticket inativado com sucesso!'
         ]);
     }
 }

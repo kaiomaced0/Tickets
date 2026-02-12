@@ -12,9 +12,12 @@ class TicketToggleActiveService
     {
         Gate::forUser($user)->authorize('toggleActive', $ticket);
 
-        $ticket->active = !$ticket->active;
-        $ticket->save();
+        if ($ticket->trashed()) {
+            $ticket->restore();
+        } else {
+            $ticket->delete();
+        }
 
-        return $ticket;
+        return $ticket->fresh();
     }
 }

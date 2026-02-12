@@ -121,10 +121,8 @@ class ApiTest extends TestCase
             ]);
 
         // Verificar que o ticket foi inativado
-        $this->assertDatabaseHas('tickets', [
-            'id' => $ticket->id,
-            'active' => false,
-        ]);
+        $ticket->refresh();
+        $this->assertNotNull($ticket->deleted_at);
     }
 
     /**
@@ -164,10 +162,8 @@ class ApiTest extends TestCase
         $response->assertStatus(403);
 
         // Verificar que o ticket permanece ativo
-        $this->assertDatabaseHas('tickets', [
-            'id' => $ticket->id,
-            'active' => true,
-        ]);
+        $ticket->refresh();
+        $this->assertNull($ticket->deleted_at);
     }
 
     /**
@@ -208,10 +204,8 @@ class ApiTest extends TestCase
             ]);
 
         // Verificar que o ticket foi inativado
-        $this->assertDatabaseHas('tickets', [
-            'id' => $ticket->id,
-            'active' => false,
-        ]);
+        $ticket->refresh();
+        $this->assertNotNull($ticket->deleted_at);
     }
 
     /**
@@ -316,5 +310,153 @@ class ApiTest extends TestCase
         // Verificar segundo log
         $this->assertEquals('EM_ANDAMENTO', $logs[1]->from_status);
         $this->assertEquals('RESOLVIDO', $logs[1]->to_status);
+    }
+
+    /**
+     * Usuário não autenticado NÃO pode acessar lista de tickets via API.
+     */
+    public function test_usuario_nao_autenticado_nao_pode_acessar_tickets_api(): void
+    {
+        $response = $this->getJson('/api/tickets');
+
+        $response->assertStatus(401);
+    }
+
+    /**
+     * Usuário não autenticado NÃO pode criar ticket via API.
+     */
+    public function test_usuario_nao_autenticado_nao_pode_criar_ticket_api(): void
+    {
+        $response = $this->postJson('/api/tickets', [
+            'titulo' => 'Titulo de teste para validar',
+            'descricao' => 'Descricao com pelo menos vinte caracteres para validar',
+        ]);
+
+        $response->assertStatus(401);
+    }
+
+    /**
+     * Usuário não autenticado NÃO pode ver ticket via API.
+     */
+    public function test_usuario_nao_autenticado_nao_pode_ver_ticket_api(): void
+    {
+        $user = User::factory()->create();
+        $ticket = Ticket::factory()->create(['solicitante_id' => $user->id]);
+
+        $response = $this->getJson("/api/tickets/{$ticket->id}");
+
+        $response->assertStatus(401);
+    }
+
+    /**
+     * Usuário não autenticado NÃO pode alterar status via API.
+     */
+    public function test_usuario_nao_autenticado_nao_pode_alterar_status_api(): void
+    {
+        $user = User::factory()->create();
+        $ticket = Ticket::factory()->create(['solicitante_id' => $user->id]);
+
+        $response = $this->patchJson("/api/tickets/{$ticket->id}/status", [
+            'status' => 'EM_ANDAMENTO',
+        ]);
+
+        $response->assertStatus(401);
+    }
+
+    /**
+     * Solicitante pode atualizar seu próprio ticket.
+     */
+    public function test_solicitante_pode_atualizar_proprio_ticket(): void
+    {
+        $solicitante = User::factory()->create(['password' => Hash::make('password')]);
+        $ticket = Ticket::factory()->create(['solicitante_id' => $solicitante->id]);
+
+        $tokenResponse = $this->postJson('/api/auth/token', [
+            'email' => $solicitante->email,
+            'password' => 'password',
+        ]);
+        $token = $tokenResponse->json('token');
+
+        $response = $this->patchJson("/api/tickets/{$ticket->id}", [
+            'titulo' => 'Titulo atualizado pelo solicitante',
+        ], ['Authorization' => "Bearer {$token}"]);
+
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('tickets', [
+            'id' => $ticket->id,
+            'titulo' => 'Titulo atualizado pelo solicitante',
+        ]);
+    }
+
+    /**
+     * Responsável pode atualizar ticket que é responsável.
+     */
+    public function test_responsavel_pode_atualizar_ticket(): void
+    {
+        $solicitante = User::factory()->create();
+        $responsavel = User::factory()->create(['password' => Hash::make('password')]);
+        $ticket = Ticket::factory()->create([
+            'solicitante_id' => $solicitante->id,
+            'responsavel_id' => $responsavel->id,
+        ]);
+
+        $tokenResponse = $this->postJson('/api/auth/token', [
+            'email' => $responsavel->email,
+            'password' => 'password',
+        ]);
+        $token = $tokenResponse->json('token');
+
+        $response = $this->patchJson("/api/tickets/{$ticket->id}", [
+            'titulo' => 'Titulo atualizado pelo responsavel',
+        ], ['Authorization' => "Bearer {$token}"]);
+
+        $response->assertStatus(200);
+    }
+
+    /**
+     * Admin pode atualizar qualquer ticket.
+     */
+    public function test_admin_pode_atualizar_qualquer_ticket(): void
+    {
+        $admin = User::factory()->admin()->create(['password' => Hash::make('password')]);
+        $solicitante = User::factory()->create();
+        $ticket = Ticket::factory()->create(['solicitante_id' => $solicitante->id]);
+
+        $tokenResponse = $this->postJson('/api/auth/token', [
+            'email' => $admin->email,
+            'password' => 'password',
+        ]);
+        $token = $tokenResponse->json('token');
+
+        $response = $this->patchJson("/api/tickets/{$ticket->id}", [
+            'titulo' => 'Titulo atualizado pelo admin',
+        ], ['Authorization' => "Bearer {$token}"]);
+
+        $response->assertStatus(200);
+    }
+
+    /**
+     * Usuário sem relação NÃO pode atualizar ticket de outro.
+     */
+    public function test_usuario_sem_relacao_nao_pode_atualizar_ticket(): void
+    {
+        $solicitante = User::factory()->create();
+        $outroUser = User::factory()->create(['password' => Hash::make('password'), 'role' => 'USER']);
+        $ticket = Ticket::factory()->create([
+            'solicitante_id' => $solicitante->id,
+            'responsavel_id' => null,
+        ]);
+
+        $tokenResponse = $this->postJson('/api/auth/token', [
+            'email' => $outroUser->email,
+            'password' => 'password',
+        ]);
+        $token = $tokenResponse->json('token');
+
+        $response = $this->patchJson("/api/tickets/{$ticket->id}", [
+            'titulo' => 'Tentativa de atualizar',
+        ], ['Authorization' => "Bearer {$token}"]);
+
+        $response->assertStatus(403);
     }
 }

@@ -23,7 +23,7 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        $user = User::withTrashed()->where('email', $request->email)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
@@ -31,7 +31,7 @@ class AuthController extends Controller
             ], 401);
         }
 
-        if (!$user->active) {
+        if (!$user->isActive()) {
             return response()->json([
                 'error' => 'Usuário inativo',
             ], 403);
