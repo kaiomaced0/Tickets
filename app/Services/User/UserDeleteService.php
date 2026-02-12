@@ -3,15 +3,13 @@
 namespace App\Services\User;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Gate;
 
 class UserDeleteService
 {
     public function handle(User $user, User $currentUser): bool
     {
-        // Não permitir deletar o próprio usuário
-        if ($user->id === $currentUser->id) {
-            throw new \Exception('Você não pode deletar seu próprio usuário!');
-        }
+        Gate::forUser($currentUser)->authorize('delete', $user);
 
         return $user->delete();
     }

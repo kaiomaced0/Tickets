@@ -3,15 +3,13 @@
 namespace App\Services\User;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Gate;
 
 class UserToggleActiveService
 {
     public function handle(User $user, User $currentUser): User
     {
-        // Não permitir desativar o próprio usuário
-        if ($user->id === $currentUser->id) {
-            throw new \Exception('Você não pode desativar seu próprio usuário!');
-        }
+        Gate::forUser($currentUser)->authorize('toggleActive', $user);
 
         $user->active = !$user->active;
         $user->save();
