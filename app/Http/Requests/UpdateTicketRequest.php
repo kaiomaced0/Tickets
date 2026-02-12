@@ -41,6 +41,7 @@ class UpdateTicketRequest extends FormRequest
             'descricao' => ['sometimes', 'required', 'string', 'min:20'],
             'prioridade' => ['sometimes', 'nullable', Rule::in(Prioridade::values())],
             'status' => ['sometimes', 'nullable', Rule::in(['ABERTO', 'EM_ANDAMENTO', 'RESOLVIDO', 'CANCELADO'])],
+            'solicitante_id' => ['sometimes', 'nullable', 'exists:users,id'],
             'responsavel_id' => ['sometimes', 'nullable', 'exists:users,id'],
             'resolved_at' => ['sometimes', 'nullable', 'date'],
         ];
