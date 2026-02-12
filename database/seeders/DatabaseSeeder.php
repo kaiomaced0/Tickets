@@ -26,10 +26,10 @@ class DatabaseSeeder extends Seeder
                 'active' => true,
             ]),
             User::factory()->create([
-                'name' => 'Ana Santos',
-                'email' => 'ana@example.com',
+                'name' => 'Caio Fernandes',
+                'email' => 'caio@example.com',
                 'password' => Hash::make('password'),
-                'api_token' => 'token-ana',
+                'api_token' => 'token-caio',
                 'role' => 'USER',
                 'active' => true,
             ]),
@@ -69,19 +69,19 @@ class DatabaseSeeder extends Seeder
 
         // Criar admins
         $techlead = User::factory()->admin()->create([
-            'name' => 'TechLead',
-            'email' => 'techlead@example.com',
+            'name' => 'Matheus Mariano',
+            'email' => 'matheus@example.com',
             'password' => Hash::make('password'),
-            'api_token' => 'token-techlead',
+            'api_token' => 'token-matheus',
             'role' => 'ADMIN',
             'active' => true,
         ]);
 
         $admin = User::factory()->admin()->create([
-            'name' => 'Fernando Souza',
-            'email' => 'fernando@example.com',
+            'name' => 'Any Sayuri',
+            'email' => 'anysayuri@example.com',
             'password' => Hash::make('password'),
-            'api_token' => 'token-fernando',
+            'api_token' => 'token-any',
             'role' => 'ADMIN',
             'active' => true,
         ]);
