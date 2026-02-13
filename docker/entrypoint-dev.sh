@@ -17,6 +17,13 @@ if [ ! -d "node_modules" ]; then
     echo "✓ Dependências do Node instaladas!"
 fi
 
+# Builda assets do Vite se não existir manifest
+if [ ! -f "public/build/manifest.json" ]; then
+    echo "🎨 Buildando assets com Vite..."
+    npm run build
+    echo "✓ Assets buildados!"
+fi
+
 # Gera APP_KEY se não existir ou estiver vazia
 if [ -z "$APP_KEY" ] || [ "$APP_KEY" = "base64:CHANGE_ME" ]; then
     echo "🔑 Gerando APP_KEY..."
