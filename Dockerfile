@@ -57,7 +57,7 @@ COPY composer.json composer.lock ./
 RUN composer install --no-dev --no-scripts --no-autoloader --optimize-autoloader
 
 # Stage para build dos assets
-FROM node:18-alpine AS assets
+FROM node:22-alpine AS assets
 
 WORKDIR /app
 

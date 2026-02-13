@@ -10,8 +10,8 @@ if [ ! -d "vendor" ] || [ ! -f "vendor/autoload.php" ]; then
     echo "✓ Dependências instaladas!"
 fi
 
-# Instala dependências do Node se não existir node_modules
-if [ ! -d "node_modules" ]; then
+# Instala dependências do Node se vite não estiver disponível
+if [ ! -x "node_modules/.bin/vite" ]; then
     echo "📦 Instalando dependências do Node..."
     npm install
     echo "✓ Dependências do Node instaladas!"
@@ -20,7 +20,7 @@ fi
 # Builda assets do Vite se não existir manifest
 if [ ! -f "public/build/manifest.json" ]; then
     echo "🎨 Buildando assets com Vite..."
-    npm run build
+    npx vite build
     echo "✓ Assets buildados!"
 fi
 
@@ -48,10 +48,10 @@ echo "✓ Migrations executadas!"
 
 # Executa seed se RUN_SEED=true E banco estiver vazio
 if [ "$RUN_SEED" = "true" ]; then
-    # Verifica se já existem usuários no banco
-    USER_COUNT=$(php artisan db:table users --columns=id --limit=1 2>/dev/null | grep -c "id" || echo "0")
+    # Verifica se já existem usuários no banco usando tinker (confiável)
+    USER_COUNT=$(php artisan tinker --execute="echo \App\Models\User::withoutGlobalScopes()->count();" 2>/dev/null | tail -1 | tr -d '[:space:]')
 
-    if [ "$USER_COUNT" = "0" ]; then
+    if [ "$USER_COUNT" = "0" ] || [ -z "$USER_COUNT" ]; then
         echo "🌱 Populando banco de dados..."
         php artisan db:seed --no-interaction
         echo "✓ Seed executado!"
